@@ -63,9 +63,11 @@ using namespace std;
 
 //string
 string temp_type_string;
-
+int typeid;
+string typename;
 
 //List
+list<string> typename_order_list;
 list<string>  temp_id_list;
 list<string>  typesec_typelist;
 list<string>  typesec_idlist;
@@ -74,6 +76,12 @@ list<string> varsec_idlist;
 list<string> :: iterator  sl_it; //sl_it = string_list_it
 list<int> typesec_type_id_list;
 list<int> varsec_type_id_list;
+list<int> error_code_list;
+
+//Set
+
+sett<string> seen_typename_set;
+set<string> seen_ids_sett;
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
@@ -840,6 +848,7 @@ struct type_nameNode* type_name()
 			strcpy(tName->id,token);
 		}
 		typevalue_to_typeid_map[token] = ttype;
+		typename_order_list.push_back(token);
 		temp_type_string = token; 
 		return tName;
 	} else
@@ -1144,10 +1153,70 @@ void print_ds()
 }
 
 
-void check_for_err()
+void check_for_error()
 {
-	//Check for errs in type sec and var sec
-	cout<<"Inside check for err ";
+	for(sl_it = typename_order_list.begin(); sl_it != typename_order_list.end(); sl_it++)
+	{
+		typename = (*sl_it)
+		typeid = typevalue_to_typeid_map[typename]
+		
+		//check for error code 0
+		if (seen_typename_set.count(typename!=0))
+		{
+			error_code_list.push_back(0);
+		}
+
+		//check for error code 1
+		if (seen_typename_set.count(typename != 0) && seen_ids_set.count(typename != 0 ))
+
+		{
+			error_code_list.push_back(1);
+
+		}
+
+		//check for error code 2
+		temp_id_list = typesec_typename_to_idlist_map[typename]
+		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		{
+			if (seen_ids_set.find((*sl_it)!=0))
+			{
+				error_code_list.push_back(2)
+			}
+		}
+	
+		//Populating seen data structures
+	
+		seen_typename_set.insert(typename);
+
+		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		{
+			seen_ids_set.insert((*sl_it))	
+		}
+	} 
+}
+
+
+void get_results_table()
+{
+	for(sl_it = typename_order_list.begin(); sl_it != typename_order_list.end(); sl_it++)
+	{
+		typename = (*sl_it)
+		typeid = typevalue_to_typeid_map[typename]
+
+		if (typeid==ID)
+		{
+			new_val += start_val + 1;
+			start_val += 1;
+			typevalue_to_typeid_map[typename] = new_val;
+		
+			//update this change to rest of the vaues having this type
+			temp_id_list = typesec_typename_to_idlist_map[typename]
+			for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+			{
+				typevalue_to_typeid_map[(*sl_it)] = new_val;
+			}
+		}
+	}
 }
 
 
@@ -1161,6 +1230,7 @@ int main()
 	parseTree = program();
 	play_with_ds();	
 	print_ds();
+	get_results_table();
 	check_for_err();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
