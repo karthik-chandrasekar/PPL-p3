@@ -62,28 +62,30 @@ using namespace std;
 //-------------------- Data structures -----------------------------------------
 
 //string
-int temp_type_id;
+string temp_type_string;
 
 
 //List
 list<string>  temp_id_list;
-list<int>  typesec_typelist;
+list<string>  typesec_typelist;
 list<string>  typesec_idlist;
-list<int>  varsec_typelist;
+list<string>  varsec_typelist;
 list<string> varsec_idlist;
 list<string> :: iterator  sl_it; //sl_it = string_list_it
-
+list<int> typesec_type_id_list;
+list<int> varsec_type_id_list;
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
-map<int, list<string> >  typeid_to_typevalueslist_map;
-map<int, list<string> >  typsec_typeid_to_idlist_map;
-map<int, list<string> > varsec_typeid_to_idlist_map;
+map<string, list<string> >  typeid_to_typevalueslist_map;
+map<string, list<string> >  typesec_typename_to_idlist_map;
+map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
 
 //Map Iterator
-map<int, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
+map<string, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
 map<string, exprNode*> :: iterator sem_it; //sem_it = string_to_exprNode_map_it
+map<string, int> :: iterator nid_it; //nid_it = typevalue_to_typeid_map
 
 
 //------------------- reserved words and token strings -----------------------
@@ -833,11 +835,12 @@ struct type_nameNode* type_name()
 	if ((ttype == ID)|(ttype == INT)|(ttype==REAL)
 		|(ttype == STRING)|(ttype==BOOLEAN))
 	{	tName->type = ttype;
-		temp_type_id = ttype;
 		if (ttype == ID)
 		{	tName->id = (char *) malloc(tokenLength+1);
 			strcpy(tName->id,token);
 		}
+		typevalue_to_typeid_map[token] = ttype;
+		temp_type_string = token; 
 		return tName;
 	} else
 	{	syntax_error("type_name. type name expected", line_no);
@@ -887,7 +890,7 @@ struct type_declNode* type_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	typeDecl->type_name = type_name();
-			typsec_typeid_to_idlist_map[temp_type_id] = temp_id_list;
+			typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 			temp_id_list.clear();
 			ttype = getToken();
 			if (ttype == SEMICOLON)
@@ -915,7 +918,7 @@ struct var_declNode* var_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
-			varsec_typeid_to_idlist_map[temp_type_id] = temp_id_list;
+			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 			temp_id_list.clear();	
 			ttype = getToken();
 			if (ttype == SEMICOLON)
@@ -1076,7 +1079,7 @@ void play_with_ds()
 
 	// Populate typsec_typelist and typesec_idlist 
 
-	for(slm_it = typsec_typeid_to_idlist_map.begin(); slm_it!=typsec_typeid_to_idlist_map.end(); slm_it++)
+	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
 		typesec_typelist.push_back((*slm_it).first);
 			
@@ -1088,7 +1091,7 @@ void play_with_ds()
 
 	// Populate varsec_typelist and varsec_idlist
 
-	for(slm_it = varsec_typeid_to_idlist_map.begin(); slm_it!=varsec_typeid_to_idlist_map.end(); slm_it++)
+	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
 	{
 		varsec_typelist.push_back((*slm_it).first);
 		
@@ -1097,15 +1100,14 @@ void play_with_ds()
 			varsec_idlist.push_back(*sl_it);
 		}
 	}
-
 }
 
 
 void print_ds()
 {
-	// Populate typsec_typelist and typesec_idlist 
+	// Print typsec_typelist and typesec_idlist 
 
-	for(slm_it = typsec_typeid_to_idlist_map.begin(); slm_it!=typsec_typeid_to_idlist_map.end(); slm_it++)
+	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
 			
@@ -1116,9 +1118,9 @@ void print_ds()
 		cout<<"\n";	
 	}
 
-	// Populate varsec_typelist and varsec_idlist
+	// Print varsec_typelist and varsec_idlist
 
-	for(slm_it = varsec_typeid_to_idlist_map.begin(); slm_it!=varsec_typeid_to_idlist_map.end(); slm_it++)
+	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
 		
@@ -1129,7 +1131,25 @@ void print_ds()
 		cout<<"\n";
 	}
 
+
+	//Print typevalue_to_typeid_map
+	
+	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
+	{
+		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";	
+	}	
+	
+
+
 }
+
+
+void check_for_err()
+{
+	//Check for errs in type sec and var sec
+	cout<<"Inside check for err ";
+}
+
 
 
 // COMMON mistakes:
@@ -1141,6 +1161,7 @@ int main()
 	parseTree = program();
 	play_with_ds();	
 	print_ds();
+	check_for_err();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
