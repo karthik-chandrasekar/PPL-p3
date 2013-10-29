@@ -10,6 +10,7 @@
 #include <map>
 #include <list>
 
+using namespace std;
 
 #define TRUE 1
 #define FALSE 0
@@ -56,6 +57,30 @@
 #define LBRACE 37
 #define RBRACE 38
 #define NOOP 39
+
+
+//-------------------- Data structures -----------------------
+
+//string
+string temp_type_string;
+
+
+//List
+list<string>  temp_id_list;
+list<string>  typesec_typelist;
+list<string>  typesec_idlist;
+list<string>  varsec_typelist;
+list<string> varsec_idlist;
+list<string> :: iterator  string_list_it;
+
+
+//Map
+map<string, int>  typevalue_to_typeid_map;
+map<int, list<string> >  typeid_to_typevalueslist_map;
+map<string, list<string> >  typesec_typename_to_idlist_map;
+map<string, list<string> > varsec_typename_to_idlist_map;
+map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
+
 
 //------------------- reserved words and token strings -----------------------
 char *reserved[] = 
@@ -693,6 +718,7 @@ struct assign_stmtNode* assign_stmt()
 		ttype = getToken();
 		if (ttype == EQUAL)
 		{	assignStmt->expr = expr();
+			stmtrhs_to_stmtlhsnode_map[assignStmt->id] = assignStmt->expr;
 			return assignStmt;
 		} else
 		{	syntax_error("assign_stmt. EQUAL expected", line_no);
@@ -803,9 +829,11 @@ struct type_nameNode* type_name()
 	if ((ttype == ID)|(ttype == INT)|(ttype==REAL)
 		|(ttype == STRING)|(ttype==BOOLEAN))
 	{	tName->type = ttype;
+		temp_type_string = ttype;
 		if (ttype == ID)
 		{	tName->id = (char *) malloc(tokenLength+1);
-			strcpy(tName->id,token);	
+			strcpy(tName->id,token);
+			temp_type_string = ttype;	
 		}
 		return tName;
 	} else
@@ -823,6 +851,7 @@ struct id_listNode* id_list()
 	{	
 		idList->id = (char*) malloc(tokenLength+1);
 		strcpy(idList->id, token);
+		temp_id_list.push_back(token);
 		ttype = getToken();
 		if (ttype == COMMA)
 		{
@@ -855,6 +884,9 @@ struct type_declNode* type_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	typeDecl->type_name = type_name();
+			typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+			temp_id_list.clear();
+			temp_type_string = "";
 			ttype = getToken();
 			if (ttype == SEMICOLON)
 			{	return typeDecl;
@@ -881,6 +913,8 @@ struct var_declNode* var_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
+			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+			temp_id_list.clear();	
 			ttype = getToken();
 			if (ttype == SEMICOLON)
 			{	return varDecl;
