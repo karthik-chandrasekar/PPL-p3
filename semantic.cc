@@ -62,14 +62,14 @@ using namespace std;
 //-------------------- Data structures -----------------------------------------
 
 //string
-string temp_type_string;
+int temp_type_id;
 
 
 //List
 list<string>  temp_id_list;
-list<string>  typesec_typelist;
+list<int>  typesec_typelist;
 list<string>  typesec_idlist;
-list<string>  varsec_typelist;
+list<int>  varsec_typelist;
 list<string> varsec_idlist;
 list<string> :: iterator  sl_it; //sl_it = string_list_it
 
@@ -77,12 +77,12 @@ list<string> :: iterator  sl_it; //sl_it = string_list_it
 //Map
 map<string, int>  typevalue_to_typeid_map;
 map<int, list<string> >  typeid_to_typevalueslist_map;
-map<string, list<string> >  typesec_typename_to_idlist_map;
-map<string, list<string> > varsec_typename_to_idlist_map;
+map<int, list<string> >  typsec_typeid_to_idlist_map;
+map<int, list<string> > varsec_typeid_to_idlist_map;
 map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
 
 //Map Iterator
-map<string, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
+map<int, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
 map<string, exprNode*> :: iterator sem_it; //sem_it = string_to_exprNode_map_it
 
 
@@ -833,11 +833,10 @@ struct type_nameNode* type_name()
 	if ((ttype == ID)|(ttype == INT)|(ttype==REAL)
 		|(ttype == STRING)|(ttype==BOOLEAN))
 	{	tName->type = ttype;
-		temp_type_string = ttype;
+		temp_type_id = ttype;
 		if (ttype == ID)
 		{	tName->id = (char *) malloc(tokenLength+1);
 			strcpy(tName->id,token);
-			temp_type_string = ttype;	
 		}
 		return tName;
 	} else
@@ -888,9 +887,8 @@ struct type_declNode* type_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	typeDecl->type_name = type_name();
-			typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+			typsec_typeid_to_idlist_map[temp_type_id] = temp_id_list;
 			temp_id_list.clear();
-			temp_type_string = "";
 			ttype = getToken();
 			if (ttype == SEMICOLON)
 			{	return typeDecl;
@@ -917,7 +915,7 @@ struct var_declNode* var_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
-			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+			varsec_typeid_to_idlist_map[temp_type_id] = temp_id_list;
 			temp_id_list.clear();	
 			ttype = getToken();
 			if (ttype == SEMICOLON)
@@ -1078,7 +1076,7 @@ void play_with_ds()
 
 	// Populate typsec_typelist and typesec_idlist 
 
-	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
+	for(slm_it = typsec_typeid_to_idlist_map.begin(); slm_it!=typsec_typeid_to_idlist_map.end(); slm_it++)
 	{
 		typesec_typelist.push_back((*slm_it).first);
 			
@@ -1090,7 +1088,7 @@ void play_with_ds()
 
 	// Populate varsec_typelist and varsec_idlist
 
-	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
+	for(slm_it = varsec_typeid_to_idlist_map.begin(); slm_it!=varsec_typeid_to_idlist_map.end(); slm_it++)
 	{
 		varsec_typelist.push_back((*slm_it).first);
 		
@@ -1098,6 +1096,37 @@ void play_with_ds()
 		{
 			varsec_idlist.push_back(*sl_it);
 		}
+	}
+
+}
+
+
+void print_ds()
+{
+	// Populate typsec_typelist and typesec_idlist 
+
+	for(slm_it = typsec_typeid_to_idlist_map.begin(); slm_it!=typsec_typeid_to_idlist_map.end(); slm_it++)
+	{
+		cout<<((*slm_it).first)<<" :";
+			
+		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
+		{
+			cout<<(*sl_it)<<" ,";			
+		}
+		cout<<"\n";	
+	}
+
+	// Populate varsec_typelist and varsec_idlist
+
+	for(slm_it = varsec_typeid_to_idlist_map.begin(); slm_it!=varsec_typeid_to_idlist_map.end(); slm_it++)
+	{
+		cout<<((*slm_it).first)<<" :";
+		
+		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
+		{
+			cout<<(*sl_it)<<" ,";
+		}
+		cout<<"\n";
 	}
 
 }
@@ -1111,6 +1140,7 @@ int main()
 	struct programNode* parseTree;
 	parseTree = program();
 	play_with_ds();	
+	print_ds();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
