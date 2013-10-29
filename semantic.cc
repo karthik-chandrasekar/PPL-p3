@@ -59,7 +59,7 @@ using namespace std;
 #define NOOP 39
 
 
-//-------------------- Data structures -----------------------
+//-------------------- Data structures -----------------------------------------
 
 //string
 string temp_type_string;
@@ -71,7 +71,7 @@ list<string>  typesec_typelist;
 list<string>  typesec_idlist;
 list<string>  varsec_typelist;
 list<string> varsec_idlist;
-list<string> :: iterator  string_list_it;
+list<string> :: iterator  sl_it; //sl_it = string_list_it
 
 
 //Map
@@ -80,6 +80,10 @@ map<int, list<string> >  typeid_to_typevalueslist_map;
 map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
+
+//Map Iterator
+map<string, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
+map<string, exprNode*> :: iterator sem_it; //sem_it = string_to_exprNode_map_it
 
 
 //------------------- reserved words and token strings -----------------------
@@ -1068,6 +1072,37 @@ struct programNode* program()
 	}
 }
 
+
+void play_with_ds()
+{
+
+	// Populate typsec_typelist and typesec_idlist 
+
+	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
+	{
+		typesec_typelist.push_back((*slm_it).first);
+			
+		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
+		{
+			typesec_idlist.push_back(*sl_it);			
+		}	
+	}
+
+	// Populate varsec_typelist and varsec_idlist
+
+	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
+	{
+		varsec_typelist.push_back((*slm_it).first);
+		
+		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
+		{
+			varsec_idlist.push_back(*sl_it);
+		}
+	}
+
+}
+
+
 // COMMON mistakes:
 //    *     = instead of ==
 //    *     not allocating space before strcpy
@@ -1075,6 +1110,7 @@ int main()
 {
 	struct programNode* parseTree;
 	parseTree = program();
+	play_with_ds();	
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
