@@ -63,11 +63,16 @@ using namespace std;
 
 //string
 string temp_type_string;
-int typeid;
-string typename;
+int temp_typeid;
+string temp_typename;
+int start_val;
+int new_val;
+
 
 //List
 list<string> typename_order_list;
+list<string> typesec_typename_order_list;
+list<string> varsec_typename_order_list;
 list<string>  temp_id_list;
 list<string>  typesec_typelist;
 list<string>  typesec_idlist;
@@ -80,12 +85,15 @@ list<int> error_code_list;
 
 //Set
 
-sett<string> seen_typename_set;
-set<string> seen_ids_sett;
+set<string> seen_typesec_typename_set;
+set<string> seen_typesec_ids_set;
+set<string> seen_varsec_typename_set;
+set<string> seen_varsec_ids_set;
+
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
-map<string, list<string> >  typeid_to_typevalueslist_map;
+map<string, list<string> >  temp_typeid_to_typevalueslist_map;
 map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
@@ -993,6 +1001,9 @@ struct var_decl_sectionNode* var_decl_section()
 {
 	struct var_decl_sectionNode *varDeclSection;
 	varDeclSection = make_var_decl_sectionNode();
+	
+	//Copy TYPE SEC seen type name order and empty it.
+	copy_typsec_typename_order_list()
 
 	ttype = getToken();
 	if (ttype == VAR)
@@ -1147,27 +1158,31 @@ void print_ds()
 	{
 		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";	
 	}	
-	
-
-
 }
 
 
 void check_for_error()
 {
-	for(sl_it = typename_order_list.begin(); sl_it != typename_order_list.end(); sl_it++)
+	copy_varsec_typename_order_list();
+	check_for_error_typesec();
+	check_for_error_varsec();
+}
+
+void check_for_errors_typesec():
+{
+	for(sl_it = typesec_typename_order_list.begin(); sl_it != typesec_typename_order_list.end(); sl_it++)
 	{
-		typename = (*sl_it)
-		typeid = typevalue_to_typeid_map[typename]
+		temp_typename = *sl_it;
+		temp_typeid = typevalue_to_typeid_map[temp_typename];
 		
 		//check for error code 0
-		if (seen_typename_set.count(typename!=0))
+		if (seen_typesec_typename_set.count(temp_typename)!=0)
 		{
 			error_code_list.push_back(0);
 		}
 
 		//check for error code 1
-		if (seen_typename_set.count(typename != 0) && seen_ids_set.count(typename != 0 ))
+		if ((seen_id_set.count(temp_typename)==1) && (seen_typesec_typename_set.count(temp_typename)==0))
 
 		{
 			error_code_list.push_back(1);
@@ -1175,22 +1190,67 @@ void check_for_error()
 		}
 
 		//check for error code 2
-		temp_id_list = typesec_typename_to_idlist_map[typename]
+		temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 		{
-			if (seen_ids_set.find((*sl_it)!=0))
+			if (seen_typesec_ids_set.count(*sl_it)!=0)
 			{
-				error_code_list.push_back(2)
+				error_code_list.push_back(2);
 			}
 		}
 	
 		//Populating seen data structures
 	
-		seen_typename_set.insert(typename);
+		seen_typesec_typename_set.insert(temp_typename);
 
 		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 		{
-			seen_ids_set.insert((*sl_it))	
+			seen_typesec_ids_set.insert(*sl_it);	
+		}
+	} 
+}
+
+
+void check_for_error_varsec()
+{
+	
+
+	for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
+	{
+		temp_typename = *sl_it;
+		temp_typeid = typevalue_to_typeid_map[temp_typename];
+		
+		//check for error code 0
+		if (seen_varsec_typename_set.count(temp_typename)!=0)
+		{
+			error_code_list.push_back(0);
+		}
+
+		//check for error code 1
+		if ((seen_varsec_id_set.count(temp_typename)==1) && (seen_varsec_typename_set.count(temp_typename)==0))
+
+		{
+			error_code_list.push_back(1);
+
+		}
+
+		//check for error code 2
+		temp_id_list = varsec_typename_to_idlist_map[temp_typename];
+		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		{
+			if (seen_varsec_ids_set.count(*sl_it)!=0)
+			{
+				error_code_list.push_back(2);
+			}
+		}
+	
+		//Populating seen data structures
+	
+		seen_varsec_typename_set.insert(temp_typename);
+
+		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		{
+			seen_varsec_ids_set.insert(*sl_it);	
 		}
 	} 
 }
@@ -1200,25 +1260,43 @@ void get_results_table()
 {
 	for(sl_it = typename_order_list.begin(); sl_it != typename_order_list.end(); sl_it++)
 	{
-		typename = (*sl_it)
-		typeid = typevalue_to_typeid_map[typename]
+		temp_typename = *sl_it;
+		temp_typeid = typevalue_to_typeid_map[temp_typename];
 
-		if (typeid==ID)
+		if (temp_typeid==ID)
 		{
 			new_val += start_val + 1;
 			start_val += 1;
-			typevalue_to_typeid_map[typename] = new_val;
+			typevalue_to_typeid_map[temp_typename] = new_val;
 		
 			//update this change to rest of the vaues having this type
-			temp_id_list = typesec_typename_to_idlist_map[typename]
+			temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 			for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 			{
-				typevalue_to_typeid_map[(*sl_it)] = new_val;
+				typevalue_to_typeid_map[*sl_it] = new_val;
 			}
 		}
 	}
 }
 
+
+void copy_typsec_typename_order_list()
+{
+	for(sl_it=typename_order_list.begin(); sl_it!=typename_order_list.end(); sl_it++)
+	{
+		typesec_typename_order_list.push_back(*sl_it);
+	}
+	typename_order_list.clear();
+}	
+
+void copy_varsec_typename_order_list()
+{
+	for(sl_it=typename_order_list.begin(); sl_it!=typename_order_list.end(); sl_it++)
+	{
+		varsec_typename_order_list.push_back(*sl_it);
+	}
+	typename_order_list.clear();
+}
 
 
 // COMMON mistakes:
@@ -1231,7 +1309,7 @@ int main()
 	play_with_ds();	
 	print_ds();
 	get_results_table();
-	check_for_err();
+	check_for_error();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
