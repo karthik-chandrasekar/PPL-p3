@@ -79,9 +79,12 @@ list<string>  typesec_idlist;
 list<string>  varsec_typelist;
 list<string> varsec_idlist;
 list<string> :: iterator  sl_it; //sl_it = string_list_it
+list<string> :: iterator sl_it_2;
+list<string> :: iterator sl_it_3;
 list<int> typesec_type_id_list;
 list<int> varsec_type_id_list;
 list<int> error_code_list;
+list<int> :: iterator il_it; //il_it = int_list_it
 
 //Set
 
@@ -367,7 +370,8 @@ void syntax_error(char* NT, int line_no)
   PRINTING PARSE TREE
 ---------------------------------------------------------------------*/
 void print_parse_tree(struct programNode* program)
-{	
+{
+	//cout<< "Inside Print parse tree";	
 	print_decl(program->decl); 
 	print_body(program->body);
 }
@@ -1003,7 +1007,7 @@ struct var_decl_sectionNode* var_decl_section()
 	varDeclSection = make_var_decl_sectionNode();
 	
 	//Copy TYPE SEC seen type name order and empty it.
-	copy_typsec_typename_order_list()
+	copy_typsec_typename_order_list();
 
 	ttype = getToken();
 	if (ttype == VAR)
@@ -1120,6 +1124,7 @@ void play_with_ds()
 			varsec_idlist.push_back(*sl_it);
 		}
 	}
+	print_ds();
 }
 
 
@@ -1127,6 +1132,7 @@ void print_ds()
 {
 	// Print typsec_typelist and typesec_idlist 
 
+	//cout<< "After first for loop in print ds"<<"\n";
 	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
@@ -1139,7 +1145,7 @@ void print_ds()
 	}
 
 	// Print varsec_typelist and varsec_idlist
-
+	//cout<< "After second for loop in print ds"<<"\n";
 	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
@@ -1153,36 +1159,32 @@ void print_ds()
 
 
 	//Print typevalue_to_typeid_map
+	//cout<< "After third for loop in print ds"<<"\n";
 	
 	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
 	{
-		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";	
+		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
 	}	
 }
 
 
-void check_for_error()
-{
-	copy_varsec_typename_order_list();
-	check_for_error_typesec();
-	check_for_error_varsec();
-}
 
-void check_for_errors_typesec():
+void check_for_error_typesec()
 {
+	//cout<< "\n"<<"Check for error type section"<<"\n";
 	for(sl_it = typesec_typename_order_list.begin(); sl_it != typesec_typename_order_list.end(); sl_it++)
 	{
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
 		
 		//check for error code 0
-		if (seen_typesec_typename_set.count(temp_typename)!=0)
+		if (seen_typesec_typename_set.count(temp_typename)!=0 and temp_typeid == 33)
 		{
 			error_code_list.push_back(0);
 		}
 
 		//check for error code 1
-		if ((seen_id_set.count(temp_typename)==1) && (seen_typesec_typename_set.count(temp_typename)==0))
+		if ((seen_typesec_ids_set.count(temp_typename)==1) && (seen_typesec_typename_set.count(temp_typename)==0))
 
 		{
 			error_code_list.push_back(1);
@@ -1191,9 +1193,9 @@ void check_for_errors_typesec():
 
 		//check for error code 2
 		temp_id_list = typesec_typename_to_idlist_map[temp_typename];
-		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 		{
-			if (seen_typesec_ids_set.count(*sl_it)!=0)
+			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(2);
 			}
@@ -1203,9 +1205,9 @@ void check_for_errors_typesec():
 	
 		seen_typesec_typename_set.insert(temp_typename);
 
-		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		for(sl_it_3 = temp_id_list.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
 		{
-			seen_typesec_ids_set.insert(*sl_it);	
+			seen_typesec_ids_set.insert(*sl_it_3);	
 		}
 	} 
 }
@@ -1213,21 +1215,17 @@ void check_for_errors_typesec():
 
 void check_for_error_varsec()
 {
-	
+	//cout<<"\n"<<"check for error var sec"<<"\n";
 
-	for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
+	for(sl_it = varsec_typename_order_list.begin(); sl_it!=varsec_typename_order_list.end(); sl_it++)
 	{
+		//cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
 		
-		//check for error code 0
-		if (seen_varsec_typename_set.count(temp_typename)!=0)
-		{
-			error_code_list.push_back(0);
-		}
 
 		//check for error code 1
-		if ((seen_varsec_id_set.count(temp_typename)==1) && (seen_varsec_typename_set.count(temp_typename)==0))
+		if ((seen_varsec_ids_set.count(temp_typename)==1) && (seen_varsec_typename_set.count(temp_typename)==0))
 
 		{
 			error_code_list.push_back(1);
@@ -1236,9 +1234,9 @@ void check_for_error_varsec()
 
 		//check for error code 2
 		temp_id_list = varsec_typename_to_idlist_map[temp_typename];
-		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 		{
-			if (seen_varsec_ids_set.count(*sl_it)!=0)
+			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(2);
 			}
@@ -1248,11 +1246,12 @@ void check_for_error_varsec()
 	
 		seen_varsec_typename_set.insert(temp_typename);
 
-		for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+		for(sl_it_3 = temp_id_list.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
 		{
-			seen_varsec_ids_set.insert(*sl_it);	
+			seen_varsec_ids_set.insert(*sl_it_3);	
 		}
-	} 
+	}
+	//cout << "\n"<<"ENd of error chekcing for var sec"<<"\n"; 
 }
 
 
@@ -1291,13 +1290,31 @@ void copy_typsec_typename_order_list()
 
 void copy_varsec_typename_order_list()
 {
+	//cout << "\n"<<"Inside copy varsec typename order list"<<"\n";
+
 	for(sl_it=typename_order_list.begin(); sl_it!=typename_order_list.end(); sl_it++)
 	{
 		varsec_typename_order_list.push_back(*sl_it);
 	}
+	//cout << "\n size of varsec order list"<<varsec_typename_order_list.size()<<"\n";
 	typename_order_list.clear();
 }
 
+void print_error()
+{
+	for(il_it=error_code_list.begin(); il_it!=error_code_list.end(); il_it++)
+	{
+		cout<<"Error "<<*il_it<<"\n";
+	}
+}
+
+void check_for_error()
+{
+	copy_varsec_typename_order_list();
+	check_for_error_typesec();
+	check_for_error_varsec();
+	print_error();
+}
 
 // COMMON mistakes:
 //    *     = instead of ==
@@ -1307,9 +1324,8 @@ int main()
 	struct programNode* parseTree;
 	parseTree = program();
 	play_with_ds();	
-	print_ds();
-	get_results_table();
 	check_for_error();
+	//get_results_table();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
