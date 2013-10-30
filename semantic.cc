@@ -85,6 +85,7 @@ list<int> typesec_type_id_list;
 list<int> varsec_type_id_list;
 list<int> error_code_list;
 list<int> :: iterator il_it; //il_it = int_list_it
+list<string>  old_id_list;
 
 //Set
 
@@ -911,6 +912,13 @@ struct type_declNode* type_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	typeDecl->type_name = type_name();
+			if(typesec_typename_to_idlist_map.count(temp_type_string)>0)
+				old_id_list = typesec_typename_to_idlist_map[temp_type_string];
+				for(sl_it=old_id_list.begin(); sl_it!=old_id_list.end(); sl_it++)
+				{
+					temp_id_list.push_back(*sl_it);
+				}
+				old_id_list.clear();
 			typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 			temp_id_list.clear();
 			ttype = getToken();
@@ -1195,6 +1203,7 @@ void check_for_error_typesec()
 		temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 		for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 		{
+			cout<<"CHeck "<<" "<<*sl_it_2<<"\n";
 			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(2);
@@ -1312,7 +1321,7 @@ void check_for_error()
 {
 	copy_varsec_typename_order_list();
 	check_for_error_typesec();
-	check_for_error_varsec();
+	//check_for_error_varsec();
 	print_error();
 }
 
