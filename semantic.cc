@@ -83,7 +83,6 @@ list<string> :: iterator sl_it_2;
 list<string> :: iterator sl_it_3;
 list<int> typesec_type_id_list;
 list<int> varsec_type_id_list;
-list<int> error_code_list;
 list<int> :: iterator il_it; //il_it = int_list_it
 list<string>  old_id_list;
 
@@ -93,7 +92,10 @@ set<string> seen_typesec_typename_set;
 set<string> seen_typesec_ids_set;
 set<string> seen_varsec_typename_set;
 set<string> seen_varsec_ids_set;
-
+set<string> typesec_idset;
+set<string> varsec_idset;
+set<int> error_code_set;
+set<int> :: iterator is_it; //is_it=int_set_it
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
@@ -1117,7 +1119,8 @@ void play_with_ds()
 			
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
-			typesec_idlist.push_back(*sl_it);			
+			typesec_idlist.push_back(*sl_it);
+			typesec_idset.insert(*sl_it);			
 		}	
 	}
 
@@ -1130,6 +1133,7 @@ void play_with_ds()
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
 			varsec_idlist.push_back(*sl_it);
+			varsec_idset.insert(*sl_it);
 		}
 	}
 	print_ds();
@@ -1151,6 +1155,7 @@ void print_ds()
 		}
 		cout<<"\n";	
 	}
+	cout<<"\n\n\n";
 
 	// Print varsec_typelist and varsec_idlist
 	//cout<< "After second for loop in print ds"<<"\n";
@@ -1164,6 +1169,7 @@ void print_ds()
 		}
 		cout<<"\n";
 	}
+	cout<<"\n\n\n";
 
 
 	//Print typevalue_to_typeid_map
@@ -1173,6 +1179,7 @@ void print_ds()
 	{
 		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
 	}	
+	cout<<"\n\n\n";
 }
 
 
@@ -1188,14 +1195,16 @@ void check_for_error_typesec()
 		//check for error code 0
 		if (seen_typesec_typename_set.count(temp_typename)!=0 and temp_typeid == 33)
 		{
-			error_code_list.push_back(0);
+			error_code_set.insert(0);
+			//exit(0);
 		}
 
 		//check for error code 1
-		if ((seen_typesec_ids_set.count(temp_typename)==1) && (seen_typesec_typename_set.count(temp_typename)==0))
+		if ((seen_typesec_ids_set.count(temp_typename)==0) && (typesec_idset.count(temp_typename)>0))
 
 		{
-			error_code_list.push_back(1);
+			error_code_set.insert(1);
+			//exit(0);
 
 		}
 
@@ -1203,21 +1212,18 @@ void check_for_error_typesec()
 		temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 		for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 		{
-			cout<<"CHeck "<<" "<<*sl_it_2<<"\n";
 			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
-				error_code_list.push_back(2);
+				error_code_set.insert(2);
+				//exit(0);
 			}
+			seen_typesec_ids_set.insert(*sl_it_2);
 		}
 	
 		//Populating seen data structures
 	
 		seen_typesec_typename_set.insert(temp_typename);
 
-		for(sl_it_3 = temp_id_list.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
-		{
-			seen_typesec_ids_set.insert(*sl_it_3);	
-		}
 	} 
 }
 
@@ -1228,16 +1234,22 @@ void check_for_error_varsec()
 
 	for(sl_it = varsec_typename_order_list.begin(); sl_it!=varsec_typename_order_list.end(); sl_it++)
 	{
-		//cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
+		cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
-		
+	
+		//check for error code 0	
+		if (seen_varsec_typename_set.count(temp_typename)!=0 and temp_typeid == 33)
+		{
+			error_code_set.insert(0);
+			//exit(0);
+		}
 
 		//check for error code 1
-		if ((seen_varsec_ids_set.count(temp_typename)==1) && (seen_varsec_typename_set.count(temp_typename)==0))
+		if ((seen_varsec_ids_set.count(temp_typename)==0) && (varsec_idset.count(temp_typename)>0))
 
 		{
-			error_code_list.push_back(1);
+			error_code_set.insert(1);
 
 		}
 
@@ -1247,18 +1259,19 @@ void check_for_error_varsec()
 		{
 			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
-				error_code_list.push_back(2);
+				error_code_set.insert(2);
 			}
+			if (seen_typesec_typename_set.count(*sl_it_2)>0)
+			{
+				error_code_set.insert(1);
+			}
+			seen_varsec_ids_set.insert(*sl_it_2);
 		}
 	
 		//Populating seen data structures
 	
 		seen_varsec_typename_set.insert(temp_typename);
 
-		for(sl_it_3 = temp_id_list.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
-		{
-			seen_varsec_ids_set.insert(*sl_it_3);	
-		}
 	}
 	//cout << "\n"<<"ENd of error chekcing for var sec"<<"\n"; 
 }
@@ -1311,9 +1324,9 @@ void copy_varsec_typename_order_list()
 
 void print_error()
 {
-	for(il_it=error_code_list.begin(); il_it!=error_code_list.end(); il_it++)
+	for(is_it=error_code_set.begin(); is_it!=error_code_set.end(); is_it++)
 	{
-		cout<<"Error "<<*il_it<<"\n";
+		cout<<"Error "<<*is_it<<"\n";
 	}
 }
 
@@ -1321,7 +1334,7 @@ void check_for_error()
 {
 	copy_varsec_typename_order_list();
 	check_for_error_typesec();
-	//check_for_error_varsec();
+	check_for_error_varsec();
 	print_error();
 }
 
