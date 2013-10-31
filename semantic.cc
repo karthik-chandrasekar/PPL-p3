@@ -1279,7 +1279,34 @@ void check_for_error_varsec()
 
 void get_results_table()
 {
-	for(sl_it = typename_order_list.begin(); sl_it != typename_order_list.end(); sl_it++)
+	start_value = 13;
+
+	//TYPE results table manipulation
+	
+	for(sl_it = typsec_typename_order_list.begin(); sl_it != typsec_typename_order_list.end(); sl_it++)
+	{
+		temp_typename = *sl_it;
+		temp_typeid = typevalue_to_typeid_map[temp_typename];
+
+		if (temp_typeid==ID)
+		{
+			new_val += start_val + 1;
+			start_val += 1;
+			typevalue_to_typeid_map[temp_typename] = new_val;
+		
+			//update this change to rest of the vaues having this type
+			temp_id_list = typesec_typename_to_idlist_map[temp_typename];
+			for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+			{
+				typevalue_to_typeid_map[*sl_it] = new_val;
+			}
+		}
+	}
+
+
+	//VAR results table manipulation
+
+	for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
 	{
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
