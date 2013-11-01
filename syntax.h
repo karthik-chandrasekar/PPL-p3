@@ -140,8 +140,17 @@ void print_id_list(struct id_listNode* idList);
 void print_stmt_list(struct stmt_listNode* stmt_list);
 void print_stmt(struct stmtNode* stmt);
 void print_assign_stmt(struct assign_stmtNode* assign_stmt);
-void print_expression_prefix(struct exprNode* expr);
+int print_expression_prefix(struct exprNode* expr);
 
+
+//Newly added
+
+void copy_typsec_typename_order_list();
+void copy_varsec_typename_order_list();
+void check_for_error_typesec();
+void check_for_error_varsec();
+void print_ds();
+void update_builtin_id_type();
 /*------------------------------------------------------------------------
   PARSING FUNCTIONS
 --------------------------------------------------------------------------*/
