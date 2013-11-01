@@ -65,10 +65,19 @@ using namespace std;
 
 //string
 string temp_type_string;
-int temp_typeid;
 string temp_typename;
+string recent_id;
+string leftop_id;
+string rightop_id;
+string selected_id;
+
+//Integer
+int temp_typeid;
 int start_val;
 int new_val;
+int leftop_type;
+int rightop_type;
+int selected_type;
 
 
 //List
@@ -104,7 +113,7 @@ set<string> repeating_typename_set;
 map<string, int>  typevalue_to_typeid_map;
 map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
-map<string, exprNode*> stmtrhs_to_stmtlhsnode_map;
+map<string, exprNode*> stmtlhs_to_stmtrhsnode_map;
 
 //Map Iterator
 map<string, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
@@ -498,27 +507,96 @@ void print_stmt(struct stmtNode* stmt)
 		print_assign_stmt(stmt->assign_stmt);
 }
 
-void print_expression_prefix(struct exprNode* expr)
+int print_expression_prefix(struct exprNode* expr)
 {
 	if (expr->tag == EXPR)
 	{
+		leftop_type = print_expression_prefix(expr->leftOperand);
+		leftop_id = recent_id;
+		recent_id = "";
+
 		printf("%s ", reserved[expr->oper]);
-		print_expression_prefix(expr->leftOperand);
-		print_expression_prefix(expr->rightOperand);
+
+		rightop_type = print_expression_prefix(expr->rightOperand);
+		rightop_id = recent_id;
+		recent_id = "";
+		
+
+		//case 1 one builtin and one user defined
+		if ((leftop_type == ID) && (rightop_type == ID))
+		{
+			//Update rightop_id with leftop_id
+						
+			selected_id = leftop_id;
+			selected_type = rightop_type;	
+
+			update_builtin_id_type();
+
+			rightop_id = leftop_id = "";
+		}
+
+		else if ((leftop_type == ID) && (rightop_type != ID) || ((rightop_type == ID && leftop_type != ID)))
+		{
+			if (leftop_type == ID)
+			{
+				selected_id = leftop_id;
+				selected_type = rightop_type;
+
+				update_builtin_id_type();
+			}
+			else 
+			{
+
+				selected_id = rightop_id;
+				selected_type = leftop_type;
+	
+				update_builtin_id_type();
+   			}
+		}
+		else
+		{
+			error_code_set.insert(2);
+			//exit(0);	
+		}
+		
 	} else
 	if (expr->tag == PRIMARY)
 	{
 		if (expr->primary->tag == ID)
+		{
 			printf("%s ", expr->primary->id);
-		else
-		if (expr->primary->tag == NUM)
+			recent_id = expr->primary->id;
+			return ID;
+		}
+		else if (expr->primary->tag == NUM)
+		{
 			printf("%d ", expr->primary->ival);
-		else
-		if (expr->primary->tag == REALNUM)
+			return NUM;
+		}
+		else if (expr->primary->tag == REALNUM)
+		{
 			printf("%.4f ", expr->primary->fval);
-
+			return REALNUM;
+		}
 	}
+	return 0;
 }
+
+void update_builtin_id_type()
+{
+	temp_id_list = typesec_typename_to_idlist_map[selected_id];
+	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+	{
+		typevalue_to_typeid_map[(*sl_it)] = selected_type;
+	}	
+	typevalue_to_typeid_map[selected_id] = selected_type;
+
+	temp_id_list = varsec_typename_to_idlist_map[selected_id];
+	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
+	{
+		typevalue_to_typeid_map[(*sl_it_2)] = selected_type;
+	}	
+} 
 
 
 /*--------------------------------------------------------------------
@@ -754,7 +832,7 @@ struct assign_stmtNode* assign_stmt()
 		ttype = getToken();
 		if (ttype == EQUAL)
 		{	assignStmt->expr = expr();
-			stmtrhs_to_stmtlhsnode_map[assignStmt->id] = assignStmt->expr;
+			stmtlhs_to_stmtrhsnode_map[assignStmt->id] = assignStmt->expr;
 			return assignStmt;
 		} else
 		{	syntax_error("assign_stmt. EQUAL expected", line_no);
@@ -1406,6 +1484,12 @@ void check_for_error()
 	print_error();
 }
 
+
+void body_handling()
+{
+	//Inside body handling	
+}
+
 // COMMON mistakes:
 //    *     = instead of ==
 //    *     not allocating space before strcpy
@@ -1415,10 +1499,11 @@ int main()
 	parseTree = program();
 	play_with_ds();	
 	check_for_error();
-	print_ds();
+	//print_ds();
 	type_typeconversion();
 	var_typeconversions();
-	print_ds();
+	//print_ds();
+	body_handling();
 	print_parse_tree(parseTree);
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
