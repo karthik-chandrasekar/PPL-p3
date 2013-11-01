@@ -488,7 +488,43 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 {
 	printf("%s ", assign_stmt->id);
 	printf("= ");
-	print_expression_prefix(assign_stmt->expr);
+
+	rightop_type = print_expression_prefix(assign_stmt->expr);
+	rightop_id = selected_id;
+
+	leftop_type = typevalue_to_typeid_map[assign_stmt->id]
+	
+	if ((leftop_type == ID) && (rightop_type == ID))
+	{
+		selected_id = assign_stmt_id;
+		selected_type = leftop_type;
+
+		update_builtin_id_type();	
+	}		
+				
+	else if (leftop_type == ID)
+	{
+		selected_id = rightop_id;
+		selected_type = leftop_type;
+
+		update_builtin_id_type();
+	}
+
+	else if (rightop_type == ID)
+	{
+
+		selected_id = leftop_id;
+		selected_type = rightop_type;
+
+		update_builtin_id_type();
+	}
+
+	else if (leftop_type != rightop_type)
+	{
+		error_code_set.insert(2);
+		//exit(0);
+	}
+
 	printf("; \n");
 }
 
@@ -553,7 +589,7 @@ int print_expression_prefix(struct exprNode* expr)
 				update_builtin_id_type();
    			}
 		}
-		else
+		else if (leftop_type != rightop_type)
 		{
 			error_code_set.insert(2);
 			//exit(0);	
@@ -891,7 +927,6 @@ struct stmt_listNode* stmt_list()
 
 	ttype = getToken();
 
-
 	if ((ttype == ID)|(ttype == WHILE))
 	{	ungetToken();
 		stmtList = make_stmt_listNode();
@@ -911,7 +946,6 @@ struct stmt_listNode* stmt_list()
 		syntax_error("stmt_list. ID or WHILE expected", line_no);
 		exit(0);
 	}
-	
 }
 
 struct bodyNode* body()
@@ -1485,10 +1519,6 @@ void check_for_error()
 }
 
 
-void body_handling()
-{
-	//Inside body handling	
-}
 
 // COMMON mistakes:
 //    *     = instead of ==
