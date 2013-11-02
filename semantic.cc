@@ -399,25 +399,30 @@ void syntax_error(char* NT, int line_no)
 ---------------------------------------------------------------------*/
 void print_parse_tree(struct programNode* program)
 {
-	//cout<< "Inside Print parse tree";	
+
+
+	cout<<"\n" <<"Inside Print parse tree"<<"\n";	
 	print_decl(program->decl); 
 	print_body(program->body);
 }
 
 void print_decl(struct declNode* dec)
 {
+	cout<<"\n" << "print decl"<<"\n";
 	if (dec->type_decl_section != NULL)
 	{	
 		print_type_decl_section(dec->type_decl_section);
 	}
 	if (dec->var_decl_section != NULL)
 	{	
-		print_var_decl_section(dec->var_decl_section);
+		//print_var_decl_section(dec->var_decl_section);
+		cout<<"Var sec commented out";
 	}
 }
 
 void print_body(struct bodyNode* body)
 {
+	cout<<"\n" << "print body"<<"\n";
 	printf("{\n");
 	print_stmt_list(body->stmt_list); 
 	printf("}\n");
@@ -487,9 +492,11 @@ void print_id_list(struct id_listNode* idList)
 
 void print_stmt_list(struct stmt_listNode* stmt_list)
 {
-	print_stmt(stmt_list->stmt);
+	print_stmt(stmt_list->stmt);	
 	if (stmt_list->stmt_list != NULL)
+	{	
 		print_stmt_list(stmt_list->stmt_list);
+	}
 
 }
 
@@ -498,26 +505,32 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	printf("%s ", assign_stmt->id);
 	printf("= ");
 
-
 	rightop_type = print_expression_prefix(assign_stmt->expr);
+
+	cout << "\n"<<"Right oppppp"<< rightop_type << "\n";
+
 
 	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
 	
-	if ((leftop_type == ID) && (rightop_type == ID))
+	cout << "\n"<<"Left oppppp"<< leftop_type << "\n";
+	
+	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
 		update_builtin_id_type(rightop_type, leftop_type);	
 	}		
-				
-	else if (leftop_type == ID)
-	{
+			
 
+	
+	else if (leftop_type > UD)
+	{
 		/**** Here *****User defined = Builtin type ******* please fix it *****/
 
 		update_builtin_id_type(leftop_type, rightop_type);
 	}
 
-	else if (rightop_type == ID)
+	else if (rightop_type > UD)
 	{
+		cout << "If condition over";
 		update_builtin_id_type(rightop_type, leftop_type);
 	}
 
@@ -547,6 +560,8 @@ void print_stmt(struct stmtNode* stmt)
 
 int print_expression_prefix(struct exprNode* expr)
 {
+	selected_type = 0;
+
 	if (expr->tag == EXPR)
 	{
 		leftop_type = print_expression_prefix(expr->leftOperand);
@@ -586,7 +601,6 @@ int print_expression_prefix(struct exprNode* expr)
 			//exit(0);	
 		}
 
-	return selected_type;
 		
 	} else	if (expr->tag == PRIMARY)
 	{
@@ -609,7 +623,7 @@ int print_expression_prefix(struct exprNode* expr)
 			return REALNUM;
 		}
 	}
-	return 0;
+	return selected_type;
 }
 
 void update_builtin_id_type(int old_id, int new_id)
@@ -1552,6 +1566,7 @@ void print_new_maps()
 		cout<<"\n";
 	}
 
+	cout<<"\n\n";
 
 	for(ism_it = typeid_to_ids_set_map.begin(); ism_it != typeid_to_ids_set_map.end(); ism_it++)
 	{
@@ -1664,16 +1679,16 @@ int main()
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
 	var_typeconversions();
-	print_ds();
+	//print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	print_new_maps();
+	//print_new_maps();
 
 	/****BODY TYPECHECK****/
-	//print_parse_tree(parseTree);
+	print_parse_tree(parseTree);
 	check_for_error();
-
+	print_new_maps();
 
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
