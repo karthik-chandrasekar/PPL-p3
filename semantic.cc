@@ -115,6 +115,10 @@ map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, exprNode*> stmtlhs_to_stmtrhsnode_map;
 
+map<int, list<string> > typsec_typeid_to_ids_list_map;
+map<int, list<string>> varsec_typename_to_idlist_map;
+
+
 //Map Iterator
 map<string, list<string> > :: iterator slm_it; //slm_it = string_to_list_map_it
 map<string, exprNode*> :: iterator sem_it; //sem_it = string_to_exprNode_map_it
@@ -489,6 +493,9 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	printf("%s ", assign_stmt->id);
 	printf("= ");
 
+	selected_type = 0;
+	selected_id = "";
+
 	rightop_type = print_expression_prefix(assign_stmt->expr);
 	rightop_id = selected_id;
 
@@ -551,27 +558,25 @@ int print_expression_prefix(struct exprNode* expr)
 	if (expr->tag == EXPR)
 	{
 		leftop_type = print_expression_prefix(expr->leftOperand);
-		leftop_id = recent_id;
-		recent_id = "";
+		leftop_id = selected_id;
 
 		printf("%s ", reserved[expr->oper]);
 
 		rightop_type = print_expression_prefix(expr->rightOperand);
-		rightop_id = recent_id;
-		recent_id = "";
+		rightop_id = selected_id;
 		
 
 		//case 1 one builtin and one user defined
-		if ((leftop_type == ID) && (rightop_type == ID))
+		if (((leftop_type == ID) && (rightop_type == ID)) && (leftop_type != rightop_type))
 		{
 			//Update rightop_id with leftop_id
 						
 			selected_id = leftop_id;
 			selected_type = rightop_type;	
+			winner_id = rightop_id;
 
 			update_builtin_id_type();
 
-			rightop_id = leftop_id = "";
 		}
 
 		else if ((leftop_type == ID) && (rightop_type != ID) || ((rightop_type == ID && leftop_type != ID)))
@@ -580,6 +585,7 @@ int print_expression_prefix(struct exprNode* expr)
 			{
 				selected_id = leftop_id;
 				selected_type = rightop_type;
+				winner_id = rightop_id;
 
 				update_builtin_id_type();
 			}
@@ -588,15 +594,25 @@ int print_expression_prefix(struct exprNode* expr)
 
 				selected_id = rightop_id;
 				selected_type = leftop_type;
-	
+				winner_id = leftop_id;	
+
 				update_builtin_id_type();
    			}
 		}
+	
+		else if (leftop_type == rightop_type)
+		{
+i			selected_id = leftop_id;
+			selected_type = leftop_type;
+			winnder_id = 
+		}
+	
 		else if (leftop_type != rightop_type)
 		{
-			error_code_set.insert(2);
+			error_code_set.insert(3);
 			//exit(0);	
 		}
+	return selected_type;
 		
 	} else
 	if (expr->tag == PRIMARY)
@@ -604,17 +620,19 @@ int print_expression_prefix(struct exprNode* expr)
 		if (expr->primary->tag == ID)
 		{
 			printf("%s ", expr->primary->id);
-			recent_id = expr->primary->id;
+			selected_id = expr->primary->id;
 			return ID;
 		}
 		else if (expr->primary->tag == NUM)
 		{
 			printf("%d ", expr->primary->ival);
+			selected_id = expr->primary->ival;
 			return NUM;
 		}
 		else if (expr->primary->tag == REALNUM)
 		{
 			printf("%.4f ", expr->primary->fval);
+			selected_id = expr->primary->fval;
 			return REALNUM;
 		}
 	}
@@ -1058,7 +1076,8 @@ struct type_declNode* type_decl()
 				exit(0);
 			}
 		} 
-	} else
+	} 
+	else
 	{
 		syntax_error("type_decl. ID expected", line_no);
 	}
@@ -1530,14 +1549,22 @@ int main()
 {
 	struct programNode* parseTree;
 	parseTree = program();
+
+	/****POPULATING DATA STRUCTURES***/
 	play_with_ds();	
 	check_for_error();
 	//print_ds();
+
+	/****TYPE CONVERSIONS****/
 	type_typeconversion();
 	var_typeconversions();
 	print_ds();
+
+	/****BODY TYPECHECK****/
 	print_parse_tree(parseTree);
 	check_for_error();
+
+
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
 }
