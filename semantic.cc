@@ -492,11 +492,11 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	rightop_type = print_expression_prefix(assign_stmt->expr);
 	rightop_id = selected_id;
 
-	leftop_type = typevalue_to_typeid_map[assign_stmt->id]
+	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
 	
 	if ((leftop_type == ID) && (rightop_type == ID))
 	{
-		selected_id = assign_stmt_id;
+		selected_id = rightop_id;
 		selected_type = leftop_type;
 
 		update_builtin_id_type();	
@@ -504,14 +504,9 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 				
 	else if (leftop_type == ID)
 	{
-		selected_id = rightop_id;
-		selected_type = leftop_type;
 
-		update_builtin_id_type();
-	}
+		/**** Here *****User defined = Builtin type ******* please fix it *****/
 
-	else if (rightop_type == ID)
-	{
 
 		selected_id = leftop_id;
 		selected_type = rightop_type;
@@ -519,9 +514,17 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 		update_builtin_id_type();
 	}
 
+	else if (rightop_type == ID)
+	{
+		selected_id = rightop_id;
+		selected_type = leftop_type;
+
+		update_builtin_id_type();
+	}
+
 	else if (leftop_type != rightop_type)
 	{
-		error_code_set.insert(2);
+		error_code_set.insert(3);
 		//exit(0);
 	}
 
@@ -1532,9 +1535,9 @@ int main()
 	//print_ds();
 	type_typeconversion();
 	var_typeconversions();
-	//print_ds();
-	body_handling();
+	print_ds();
 	print_parse_tree(parseTree);
+	check_for_error();
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
 }
