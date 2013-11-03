@@ -73,7 +73,7 @@ string selected_id;
 
 //Integer
 int temp_typeid;
-int start_val;
+int start_val = 13;
 int new_val;
 int leftop_type;
 int rightop_type;
@@ -85,6 +85,7 @@ list<string> typename_order_list;
 list<string> typesec_typename_order_list;
 list<string> varsec_typename_order_list;
 list<string>  temp_id_list;
+list<string> temp_id_list_2;
 list<string>  typesec_typelist;
 list<string>  typesec_idlist;
 list<string>  varsec_typelist;
@@ -107,7 +108,6 @@ set<string> typesec_idset;
 set<string> varsec_idset;
 set<int> error_code_set;
 set<int> :: iterator is_it; 				//is_it=int_set_it
-set<string> repeating_typename_set; 
 set<string> old_id_set;
 set<string> :: iterator ss_it; 				// string set iterator
 set<string>  temp_id_set;
@@ -415,8 +415,7 @@ void print_decl(struct declNode* dec)
 	}
 	if (dec->var_decl_section != NULL)
 	{	
-		//print_var_decl_section(dec->var_decl_section);
-		cout<<"Var sec commented out";
+		print_var_decl_section(dec->var_decl_section);
 	}
 }
 
@@ -512,7 +511,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
 	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
 	
-	cout << "\n"<<"Left oppppp"<< leftop_type << "\n";
+	cout << "\n"<<"Left oppppp"<< assign_stmt->id << "\n";
 	
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
@@ -530,7 +529,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
 	else if (rightop_type > UD)
 	{
-		cout << "If condition over";
+		//cout << "If condition over";
 		update_builtin_id_type(rightop_type, leftop_type);
 	}
 
@@ -991,7 +990,6 @@ struct type_nameNode* type_name()
 		if(typevalue_to_typeid_map.count(token)==0)
 		{
 			typevalue_to_typeid_map[token] = ttype;
-			repeating_typename_set.insert(token);	
 		}	
 		typename_order_list.push_back(token);
 		temp_type_string = token; 
@@ -1007,6 +1005,9 @@ struct id_listNode* id_list()
 	struct id_listNode* idList;
 	idList = make_id_listNode();
 	ttype = getToken();
+
+       temp_id_list.clear();
+
 	if (ttype == ID)
 	{	
 		idList->id = (char*) malloc(tokenLength+1);
@@ -1044,15 +1045,8 @@ struct type_declNode* type_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	typeDecl->type_name = type_name();
-			if(typesec_typename_to_idlist_map.count(temp_type_string)>0)
-				old_id_list = typesec_typename_to_idlist_map[temp_type_string];
-				for(sl_it=old_id_list.begin(); sl_it!=old_id_list.end(); sl_it++)
-				{
-					temp_id_list.push_back(*sl_it);
-				}
-				old_id_list.clear();
-			typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
-			temp_id_list.clear();
+            
+		    typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 			ttype = getToken();
 			if (ttype == SEMICOLON)
 			{	return typeDecl;
@@ -1080,6 +1074,7 @@ struct var_declNode* var_decl()
 		ttype = getToken();
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
+
 			if (varsec_typename_to_idlist_map.count(temp_type_string)>0)
 				old_id_list = varsec_typename_to_idlist_map[temp_type_string];
 				for (sl_it = old_id_list.begin(); sl_it != old_id_list.end(); sl_it++)
@@ -1253,11 +1248,16 @@ void play_with_ds()
 	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
 		typesec_typelist.push_back((*slm_it).first);
-			
+
+        temp_typeid = typevalue_to_typeid_map[(*slm_it).first];
+        
+    			
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
 			typesec_idlist.push_back(*sl_it);
-			typesec_idset.insert(*sl_it);			
+			typesec_idset.insert(*sl_it);
+            typevalue_to_typeid_map[*sl_it] = temp_typeid;
+			
 		}	
 	}
 
@@ -1267,12 +1267,18 @@ void play_with_ds()
 	{
 		varsec_typelist.push_back((*slm_it).first);
 		
+        temp_typeid = typevalue_to_typeid_map[(*slm_it).first];
+
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
 			varsec_idlist.push_back(*sl_it);
 			varsec_idset.insert(*sl_it);
+            typevalue_to_typeid_map[*sl_it] = temp_typeid;
 		}
 	}
+
+
+
 }
 
 
@@ -1291,7 +1297,7 @@ void print_ds()
 		}
 		cout<<"\n";	
 	}
-	cout<<"\n\n\n";
+	cout<<"\n\n";
 
 	// Print varsec_typelist and varsec_idlist
 	//cout<< "After second for loop in print ds"<<"\n";
@@ -1305,17 +1311,17 @@ void print_ds()
 		}
 		cout<<"\n";
 	}
-	cout<<"\n\n\n";
+	cout<<"\n\n";
 
 
 	//Print typevalue_to_typeid_map
-	//cout<< "After third for loop in print ds"<<"\n";
+	cout<< "After third for loop in print ds"<<"\n";
 	
 	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
 	{
 		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
 	}	
-	cout<<"\n\n\n";
+	cout<<"\n\n";
 }
 
 
@@ -1329,7 +1335,7 @@ void check_for_error_typesec()
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
 		
 		//check for error code 0
-		if (seen_typesec_typename_set.count(temp_typename)!=0 and temp_typeid == 33)
+		if (seen_typesec_typename_set.count(temp_typename)!=0)
 		{
 			error_code_set.insert(0);
 			//exit(0);
@@ -1370,16 +1376,10 @@ void check_for_error_varsec()
 
 	for(sl_it = varsec_typename_order_list.begin(); sl_it!=varsec_typename_order_list.end(); sl_it++)
 	{
-		cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
+		//cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
 	
-		//check for error code 0	
-		if (seen_varsec_typename_set.count(temp_typename)!=0 and temp_typeid == 33)
-		{
-			error_code_set.insert(0);
-			//exit(0);
-		}
 
 		//check for error code 1
 		if ((seen_varsec_ids_set.count(temp_typename)==0) && (varsec_idset.count(temp_typename)>0))
@@ -1415,9 +1415,7 @@ void check_for_error_varsec()
 
 void type_typeconversion()
 {
-	cout << "typeconversion part";
-	start_val = 13;
-
+	//cout << "typeconversion part";
 	//TYPE results table manipulation
 
 	
@@ -1426,29 +1424,47 @@ void type_typeconversion()
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
 
-		if (temp_typeid==ID)
+		if (temp_typeid==ID || temp_typeid <14)
 		{
-			new_val += start_val + 1;
-			start_val = new_val;
-			typevalue_to_typeid_map[temp_typename] = new_val;
-		
+            if (temp_typeid==ID)
+            {
+                new_val = start_val + 1;
+                start_val = new_val;
+                typevalue_to_typeid_map[temp_typename] = new_val;
+		    }
+
+            else 
+            {
+                new_val = temp_typeid;
+
+            }
+
 			//update this change to rest of the vaues having this type
 			temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 			for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 			{
-				typevalue_to_typeid_map[(*sl_it_2)] = new_val;
+				typevalue_to_typeid_map[*sl_it_2] = new_val;
+            
+                if (seen_typesec_typename_set.count(*sl_it_2)>0)
+                {
+                    temp_id_list_2 = typesec_typename_to_idlist_map[*sl_it_2];
+                    for(sl_it_3 = temp_id_list_2.begin(); sl_it_3 != temp_id_list_2.end(); sl_it_3++)
+                    {
+                        typevalue_to_typeid_map[*sl_it_3] = new_val;
+                    }
+                }
+
+                if (seen_varsec_typename_set.count(*sl_it_2)>0)
+                {
+                    temp_id_list_2 = varsec_typename_to_idlist_map[*sl_it_2];
+                    for(sl_it_3 = temp_id_list_2.begin(); sl_it_3 != temp_id_list_2.end(); sl_it_3++)
+                    {
+                        typevalue_to_typeid_map[*sl_it_3] = new_val;
+                    }
+                }
 			}
+
 		}
-		else if(repeating_typename_set.count(temp_typename) > 0)
-		{
-			//In this case, update the temp id value to all the ids
-			temp_id_list = typesec_typename_to_idlist_map[temp_typename];
-			for(sl_it_3 = temp_id_list.begin(); sl_it_3 !=temp_id_list.end(); sl_it_3++)
-			{
-				typevalue_to_typeid_map[(*sl_it_3)] = temp_typeid;
-			}
-			typevalue_to_typeid_map[temp_typename] = temp_typeid;
-		}		
 	}
 }
 
@@ -1600,8 +1616,8 @@ void var_typeconversions()
 
 		if (temp_typeid==ID)
 		{
-			new_val += start_val + 1;
-			start_val += 1;
+			new_val = start_val + 1;
+			start_val = new_val;
 			typevalue_to_typeid_map[temp_typename] = new_val;
 		
 			//update this change to rest of the vaues having this type
@@ -1609,17 +1625,20 @@ void var_typeconversions()
 			for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 			{
 				typevalue_to_typeid_map[*sl_it_2] = new_val;
-			}
-		}
-		else 
-		{
-			temp_id_list = varsec_typename_to_idlist_map[temp_typename];
-			for(sl_it_3 = temp_id_list.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
-			{
-				typevalue_to_typeid_map[*sl_it_3] = temp_typeid;
-			}
-		}
+                
+                if(seen_varsec_typename_set.count(*sl_it_2)>0)
+                 {
+                    temp_id_list_2 = varsec_typename_to_idlist_map[*sl_it_2];
+                    
+                    for(sl_it_3 = temp_id_list_2.begin(); sl_it_3 != temp_id_list.end(); sl_it_3++)
+                    {
+                        typevalue_to_typeid_map[*sl_it_3] = new_val;
+                    }
 
+                }
+
+			}
+		}
 	}
 }
 
@@ -1674,21 +1693,21 @@ int main()
 	/****POPULATING DATA STRUCTURES***/
 	play_with_ds();	
 	check_for_error();
-	//print_ds();
+	print_ds();
 
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
-	var_typeconversions();
-	//print_ds();
+    var_typeconversions();
+	print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
-	get_new_maps();
+	//get_new_maps();
 	//print_new_maps();
 
 	/****BODY TYPECHECK****/
-	print_parse_tree(parseTree);
-	check_for_error();
-	print_new_maps();
+	//print_parse_tree(parseTree);
+	//check_for_error();
+	//print_new_maps();
 
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
