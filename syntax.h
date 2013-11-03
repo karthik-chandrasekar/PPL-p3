@@ -150,7 +150,9 @@ void copy_varsec_typename_order_list();
 void check_for_error_typesec();
 void check_for_error_varsec();
 void print_ds();
-void update_builtin_id_type();
+void update_builtin_id_type(int old_id, int new_id);
+void print_new_maps();
+
 /*------------------------------------------------------------------------
   PARSING FUNCTIONS
 --------------------------------------------------------------------------*/
