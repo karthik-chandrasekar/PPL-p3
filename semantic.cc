@@ -399,11 +399,12 @@ void syntax_error(char* NT, int line_no)
 ---------------------------------------------------------------------*/
 void print_parse_tree(struct programNode* program)
 {
-
-
 	cout<<"\n" <<"Inside Print parse tree"<<"\n";	
-	print_decl(program->decl); 
-	print_body(program->body);
+	print_decl(program->decl);
+
+    cout<<"\n Body part started<<\n\n\n\n";
+ 
+	//print_body(program->body);
 }
 
 void print_decl(struct declNode* dec)
@@ -413,10 +414,16 @@ void print_decl(struct declNode* dec)
 	{	
 		print_type_decl_section(dec->type_decl_section);
 	}
+
+    cout << "\nVar printing starting\n";
+
 	if (dec->var_decl_section != NULL)
 	{	
 		print_var_decl_section(dec->var_decl_section);
 	}
+    
+    cout << "\nVar printing ended\n";
+
 }
 
 void print_body(struct bodyNode* body)
@@ -433,6 +440,9 @@ void print_var_decl_section(struct var_decl_sectionNode* varDeclSection)
 	printf("VAR\n");
 	if (varDeclSection->var_decl_list != NULL)
 		print_var_decl_list(varDeclSection->var_decl_list);
+       
+    cout << "\nVar decl section is over\n";
+
 }
 
 void print_var_decl_list(struct var_decl_listNode* varDeclList)
@@ -493,9 +503,7 @@ void print_stmt_list(struct stmt_listNode* stmt_list)
 {
 	print_stmt(stmt_list->stmt);	
 	if (stmt_list->stmt_list != NULL)
-	{	
 		print_stmt_list(stmt_list->stmt_list);
-	}
 
 }
 
@@ -1006,7 +1014,6 @@ struct id_listNode* id_list()
 	idList = make_id_listNode();
 	ttype = getToken();
 
-       temp_id_list.clear();
 
 	if (ttype == ID)
 	{	
@@ -1047,6 +1054,8 @@ struct type_declNode* type_decl()
 		{	typeDecl->type_name = type_name();
             
 		    typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+            temp_id_list.clear();            
+
 			ttype = getToken();
 			if (ttype == SEMICOLON)
 			{	return typeDecl;
@@ -1570,6 +1579,8 @@ void print_new_maps()
 		cout<<"\n";
 	}
 
+    cout << "\n";
+
 	for(ilm_it = varsec_typeid_to_ids_list_map.begin(); ilm_it != varsec_typeid_to_ids_list_map.end(); ilm_it++)
 	{
 		cout<< (*ilm_it).first<<":";
@@ -1582,7 +1593,7 @@ void print_new_maps()
 		cout<<"\n";
 	}
 
-	cout<<"\n\n";
+	cout<<"\n";
 
 	for(ism_it = typeid_to_ids_set_map.begin(); ism_it != typeid_to_ids_set_map.end(); ism_it++)
 	{
@@ -1595,12 +1606,14 @@ void print_new_maps()
 		}
 		cout<<"\n";
 	}
+
+    cout <<"\n";
 }
 
 void get_new_maps()
 {
-	get_varsec_typeid_to_ids_list_map();
 	get_typesec_typeid_to_ids_list_map();
+	get_varsec_typeid_to_ids_list_map();
 }
 
 
@@ -1701,11 +1714,11 @@ int main()
 	print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
-	//get_new_maps();
-	//print_new_maps();
+	get_new_maps();
+	print_new_maps();
 
 	/****BODY TYPECHECK****/
-	//print_parse_tree(parseTree);
+	print_parse_tree(parseTree);
 	//check_for_error();
 	//print_new_maps();
 
