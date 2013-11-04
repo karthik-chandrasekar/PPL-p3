@@ -111,6 +111,7 @@ set<int> :: iterator is_it; 				//is_it=int_set_it
 set<string> old_id_set;
 set<string> :: iterator ss_it; 				// string set iterator
 set<string>  temp_id_set;
+set<string> temp_id_set_1;
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
@@ -508,9 +509,13 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	printf("= ");
 
 	rightop_type = print_expression_prefix(assign_stmt->expr);
+    
+    cout << "Rightop info "<<assign_stmt->id<< " is "<< rightop_type<<"\n";
 
 	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
 	
+    cout<< "Leftop info  "<<selected_id<<" is "<< leftop_type<<"\n";
+
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
 		update_builtin_id_type(rightop_type, leftop_type);	
@@ -560,11 +565,12 @@ int print_expression_prefix(struct exprNode* expr)
 	if (expr->tag == EXPR)
 	{
 		leftop_type = print_expression_prefix(expr->leftOperand);
+        cout << "\nLeftop type is "<<leftop_type<<"\n";
 
 		printf("%s ", reserved[expr->oper]);
 
 		rightop_type = print_expression_prefix(expr->rightOperand);
-		
+		cout << "\nRightop type is "<<rightop_type<<"\n";
 
 		if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 		{
@@ -572,18 +578,17 @@ int print_expression_prefix(struct exprNode* expr)
 			selected_type = leftop_type;
 		}
 
-		else if ((leftop_type > ID) && (rightop_type > ID) || ((rightop_type > ID && leftop_type > ID)))
+		else if (leftop_type > UD)
 		{
-			if (leftop_type > ID)
-			{
-				update_builtin_id_type(leftop_type, rightop_type);
-				selected_type = rightop_type;
-			}
-			else 
-			{
-				update_builtin_id_type(rightop_type, leftop_type);
-   			}
+            update_builtin_id_type(leftop_type, rightop_type);
+            selected_type = rightop_type;
 		}
+		else if (rightop_type > UD) 
+		{
+            cout << "Expected else if right op is greater than UD\n";
+            update_builtin_id_type(rightop_type, leftop_type);
+            selected_type = leftop_type;
+   		}
 	
 		else if (leftop_type == rightop_type)
 		{
@@ -593,7 +598,6 @@ int print_expression_prefix(struct exprNode* expr)
 		else if (leftop_type != rightop_type)
 		{
 			error_code_set.insert(3);
-			//exit(0);	
 		}
 
 		
@@ -603,7 +607,7 @@ int print_expression_prefix(struct exprNode* expr)
 		{
 			printf("%s ", expr->primary->id);
 			selected_id = expr->primary->id;
-			return ID;
+			return typevalue_to_typeid_map[selected_id];
 		}
 		else if (expr->primary->tag == NUM)
 		{
@@ -626,14 +630,26 @@ void update_builtin_id_type(int old_id, int new_id)
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
 	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 	{
-		typevalue_to_typeid_map[(*sl_it)] = new_id;
+		typevalue_to_typeid_map[*sl_it] = new_id;
+        temp_id_set.insert(*sl_it);
 	}	
 
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
 	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 	{
-		typevalue_to_typeid_map[(*sl_it_2)] = new_id;
-	}	
+		typevalue_to_typeid_map[*sl_it_2] = new_id;
+        temp_id_set_1.insert(*sl_it);
+	}
+	
+    temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
+
+    typeid_to_ids_set_map[new_id] = temp_id_set;
+    
+    temp_id_set.clear();
+    
+    typeid_to_ids_set_map[old_id] = temp_id_set;
+
+    temp_id_set_1.clear();
 } 
 
 
