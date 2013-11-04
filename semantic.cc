@@ -399,36 +399,28 @@ void syntax_error(char* NT, int line_no)
 ---------------------------------------------------------------------*/
 void print_parse_tree(struct programNode* program)
 {
-	cout<<"\n" <<"Inside Print parse tree"<<"\n";	
 	print_decl(program->decl);
 
-    cout<<"\n Body part started<<\n\n\n\n";
  
-	//print_body(program->body);
+	print_body(program->body);
 }
 
 void print_decl(struct declNode* dec)
 {
-	cout<<"\n" << "print decl"<<"\n";
 	if (dec->type_decl_section != NULL)
 	{	
 		print_type_decl_section(dec->type_decl_section);
 	}
-
-    cout << "\nVar printing starting\n";
 
 	if (dec->var_decl_section != NULL)
 	{	
 		print_var_decl_section(dec->var_decl_section);
 	}
     
-    cout << "\nVar printing ended\n";
-
 }
 
 void print_body(struct bodyNode* body)
 {
-	cout<<"\n" << "print body"<<"\n";
 	printf("{\n");
 	print_stmt_list(body->stmt_list); 
 	printf("}\n");
@@ -441,13 +433,13 @@ void print_var_decl_section(struct var_decl_sectionNode* varDeclSection)
 	if (varDeclSection->var_decl_list != NULL)
 		print_var_decl_list(varDeclSection->var_decl_list);
        
-    cout << "\nVar decl section is over\n";
-
 }
 
 void print_var_decl_list(struct var_decl_listNode* varDeclList)
 {
+    
 	print_var_decl(varDeclList->var_decl);
+
 	if (varDeclList->var_decl_list != NULL)
 		print_var_decl_list(varDeclList->var_decl_list);	
 }
@@ -469,7 +461,9 @@ void print_type_decl_section(struct type_decl_sectionNode* typeDeclSection)
 
 void print_type_decl_list(struct type_decl_listNode* typeDeclList)
 {
+
 	print_type_decl(typeDeclList->type_decl);
+
 	if (typeDeclList->type_decl_list != NULL)
 		print_type_decl_list(typeDeclList->type_decl_list);	
 }
@@ -509,25 +503,19 @@ void print_stmt_list(struct stmt_listNode* stmt_list)
 
 void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 {
+
 	printf("%s ", assign_stmt->id);
 	printf("= ");
 
 	rightop_type = print_expression_prefix(assign_stmt->expr);
 
-	cout << "\n"<<"Right oppppp"<< rightop_type << "\n";
-
-
 	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
-	
-	cout << "\n"<<"Left oppppp"<< assign_stmt->id << "\n";
 	
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
 		update_builtin_id_type(rightop_type, leftop_type);	
 	}		
 			
-
-	
 	else if (leftop_type > UD)
 	{
 		/**** Here *****User defined = Builtin type ******* please fix it *****/
@@ -882,7 +870,6 @@ struct assign_stmtNode* assign_stmt()
 		ttype = getToken();
 		if (ttype == EQUAL)
 		{	assignStmt->expr = expr();
-			stmtlhs_to_stmtrhsnode_map[assignStmt->id] = assignStmt->expr;
 			return assignStmt;
 		} else
 		{	syntax_error("assign_stmt. EQUAL expected", line_no);
@@ -953,6 +940,7 @@ struct stmt_listNode* stmt_list()
 		} else	// If the next token is not in FOLLOW(stmt_list), 
 			// let the caller handle it. 
 		{	ungetToken();
+            stmtList -> stmt_list = NULL;
 			return stmtList;
 		}
 	} else
@@ -1084,17 +1072,12 @@ struct var_declNode* var_decl()
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
 
-			if (varsec_typename_to_idlist_map.count(temp_type_string)>0)
-				old_id_list = varsec_typename_to_idlist_map[temp_type_string];
-				for (sl_it = old_id_list.begin(); sl_it != old_id_list.end(); sl_it++)
-				{
-					temp_id_list.push_back(*sl_it);
-				}
 			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 			temp_id_list.clear();	
 			ttype = getToken();
 			if (ttype == SEMICOLON)
-			{	return varDecl;
+			{	
+                return varDecl;
 			}
 			else
 			{	syntax_error("var_decl. SEMICOLON expected", line_no);
@@ -1106,6 +1089,7 @@ struct var_declNode* var_decl()
 
 struct var_decl_listNode* var_decl_list()
 {
+
 	struct var_decl_listNode* varDeclList;
 	varDeclList = make_var_decl_listNode();
 
@@ -1120,6 +1104,7 @@ struct var_decl_listNode* var_decl_list()
 			return varDeclList;
 		}  else	
 		{	ungetToken();
+            varDeclList->var_decl_list = NULL;
 			return varDeclList;
 		} 
 	} else
@@ -1144,6 +1129,7 @@ struct type_decl_listNode* type_decl_list()
 			return typeDeclList;
 		}  else	
 		{	ungetToken();
+            typeDeclList->type_decl_list = NULL;
 			return typeDeclList;
 		} 
 	} else
@@ -1204,10 +1190,11 @@ struct declNode* decl()
 			// next token is checked
 			ungetToken();
        			dec->var_decl_section = var_decl_section();
-    		} else
-		{	ungetToken();
-			dec->var_decl_section = NULL;
-		}
+    		} 
+        else
+            {	ungetToken();
+                dec->var_decl_section = NULL;
+            }
 		return dec;
 	} else
 	{
@@ -1219,16 +1206,17 @@ struct declNode* decl()
 			ungetToken(); 
        			dec->var_decl_section = var_decl_section();
 			return dec;
-    		} else
-		{	if (ttype == LBRACE)
-			{	ungetToken();	
-				dec->var_decl_section = NULL;
-				return dec;
-			} else
-			{	syntax_error("decl. LBRACE expected", line_no);
-				exit(0);		// stop after first syntax error
-			}
-		}
+    		} 
+            else
+            {	if (ttype == LBRACE)
+                {	ungetToken();	
+                    dec->var_decl_section = NULL;
+                    return dec;
+                } else
+                {	syntax_error("decl. LBRACE expected", line_no);
+                    exit(0);		// stop after first syntax error
+                }
+            }
 	}
 }
 
@@ -1240,7 +1228,7 @@ struct programNode* program()
 	if ((ttype == TYPE) | (ttype == VAR) | (ttype == LBRACE))
 	{	ungetToken();  
 		prog->decl = decl();
-		prog->body = body();
+	    prog->body = body();
 		return prog;
 	} else
 	{	syntax_error("program. TYPE or VAR or LBRACE expected", line_no);
@@ -1687,7 +1675,11 @@ void print_error()
 
 void check_for_error()
 {
-	copy_varsec_typename_order_list();
+    seen_typesec_typename_set.clear();
+    seen_varsec_typename_set.clear();
+    seen_typesec_ids_set.clear();
+    seen_varsec_ids_set.clear();
+
 	check_for_error_typesec();
 	check_for_error_varsec();
 	print_error();
@@ -1705,22 +1697,23 @@ int main()
 
 	/****POPULATING DATA STRUCTURES***/
 	play_with_ds();	
+	copy_varsec_typename_order_list();
 	check_for_error();
-	print_ds();
+	//print_ds();
 
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
     var_typeconversions();
-	print_ds();
+	//print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	print_new_maps();
+	//print_new_maps();
 
 	/****BODY TYPECHECK****/
 	print_parse_tree(parseTree);
-	//check_for_error();
-	//print_new_maps();
+	check_for_error();
+	print_new_maps();
 
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
