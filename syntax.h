@@ -152,6 +152,11 @@ void check_for_error_varsec();
 void print_ds();
 void update_builtin_id_type(int old_id, int new_id);
 void print_new_maps();
+void format_output();
+void generate_fina_output();
+void form_parent_to_childlist_map();
+void print_final_output();
+void populate_built_in_types_set();
 
 /*------------------------------------------------------------------------
   PARSING FUNCTIONS
