@@ -512,7 +512,21 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
     
     cout << "Rightop info "<<assign_stmt->id<< " is "<< rightop_type<<"\n";
 
-	leftop_type = typevalue_to_typeid_map[assign_stmt->id];
+    if(typevalue_to_typeid_map[assign_stmt->id] == 0)
+      {
+        typevalue_to_typeid_map[assign_stmt->id] = start_val + 1;
+        start_val = start_val + 1;
+        leftop_type = start_val;
+
+        temp_id_set.clear();
+        //temp_id_set.insert(("%s",assign_stmt->id));
+        //typeid_to_ids_set_map[assign_stmt->id] = temp_id_set;
+      }
+    
+    else
+      {
+        leftop_type = typevalue_to_typeid_map[assign_stmt->id];
+      }
 	
     cout<< "Leftop info  "<<selected_id<<" is "<< leftop_type<<"\n";
 
@@ -607,7 +621,19 @@ int print_expression_prefix(struct exprNode* expr)
 		{
 			printf("%s ", expr->primary->id);
 			selected_id = expr->primary->id;
-			return typevalue_to_typeid_map[selected_id];
+			if(typevalue_to_typeid_map.count(selected_id) == 0)
+            {
+                typevalue_to_typeid_map[selected_id] = start_val + 1;
+                start_val = start_val + 1;
+                temp_typeid = start_val;
+
+                return temp_typeid;
+            }
+            else
+            {
+                temp_typeid = typevalue_to_typeid_map[selected_id];
+                return temp_typeid;
+            }
 		}
 		else if (expr->primary->tag == NUM)
 		{
@@ -627,6 +653,11 @@ int print_expression_prefix(struct exprNode* expr)
 
 void update_builtin_id_type(int old_id, int new_id)
 {
+
+    temp_id_set.clear();
+    temp_id_set_1.clear();
+
+
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
 	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 	{
@@ -643,6 +674,10 @@ void update_builtin_id_type(int old_id, int new_id)
 	
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
 
+    temp_id_set_1.clear();    
+
+    temp_id_set_1 = typeid_to_ids_set_map[new_id];
+    temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
     
     temp_id_set.clear();
@@ -1724,7 +1759,7 @@ int main()
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	//print_new_maps();
+	print_new_maps();
 
 	/****BODY TYPECHECK****/
 	print_parse_tree(parseTree);
