@@ -97,6 +97,8 @@ list<int> typesec_type_id_list;
 list<int> varsec_type_id_list;
 list<int> :: iterator il_it; //il_it = int_list_it
 list<string>  old_id_list;
+list<int> error_code_list;
+
 
 //Set
 
@@ -106,7 +108,6 @@ set<string> seen_varsec_typename_set;
 set<string> seen_varsec_ids_set;
 set<string> typesec_idset;
 set<string> varsec_idset;
-set<int> error_code_set;
 set<int> :: iterator is_it; 				//is_it=int_set_it
 set<string> old_id_set;
 set<string> :: iterator ss_it; 				// string set iterator
@@ -550,7 +551,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
 	else if (leftop_type != rightop_type)
 	{
-		error_code_set.insert(3);
+		error_code_list.push_back(3);
 		//exit(0);
 	}
 
@@ -611,7 +612,7 @@ int print_expression_prefix(struct exprNode* expr)
 	
 		else if (leftop_type != rightop_type)
 		{
-			error_code_set.insert(3);
+			error_code_list.push_back(3);
 		}
 
 		
@@ -1385,7 +1386,7 @@ void check_for_error_typesec()
 		//check for error code 0
 		if (seen_typesec_typename_set.count(temp_typename)!=0)
 		{
-			error_code_set.insert(0);
+			error_code_list.push_back(0);
 			//exit(0);
 		}
 
@@ -1393,7 +1394,7 @@ void check_for_error_typesec()
 		if ((seen_typesec_ids_set.count(temp_typename)==0) && (typesec_idset.count(temp_typename)>0))
 
 		{
-			error_code_set.insert(1);
+			error_code_list.push_back(0);
 			//exit(0);
 
 		}
@@ -1404,7 +1405,7 @@ void check_for_error_typesec()
 		{
 			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
-				error_code_set.insert(2);
+				error_code_list.push_back(0);
 				//exit(0);
 			}
 			seen_typesec_ids_set.insert(*sl_it_2);
@@ -1433,7 +1434,7 @@ void check_for_error_varsec()
 		if ((seen_varsec_ids_set.count(temp_typename)==0) && (varsec_idset.count(temp_typename)>0))
 
 		{
-			error_code_set.insert(1);
+			error_code_list.push_back(1);
 
 		}
 
@@ -1443,11 +1444,11 @@ void check_for_error_varsec()
 		{
 			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
-				error_code_set.insert(2);
+				error_code_list.push_back(2);
 			}
-			if (seen_typesec_typename_set.count(*sl_it_2)>0)
+			if (seen_typesec_typename_set.count(*sl_it_2)>0 || seen_typesec_ids_set.count(*sl_it_2)>0)
 			{
-				error_code_set.insert(1);
+				error_code_list.push_back(1);
 			}
 			seen_varsec_ids_set.insert(*sl_it_2);
 		}
@@ -1718,9 +1719,10 @@ void copy_varsec_typename_order_list()
 
 void print_error()
 {
-	for(is_it=error_code_set.begin(); is_it!=error_code_set.end(); is_it++)
+	for(il_it=error_code_list.begin(); il_it!=error_code_list.end(); il_it++)
 	{
-		cout<<"Error "<<*is_it<<"\n";
+		cout<<"ERROR CODE "<<*il_it<<"\n";
+        exit(0);
 	}
 }
 
@@ -1759,12 +1761,12 @@ int main()
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	print_new_maps();
+	//print_new_maps();
 
 	/****BODY TYPECHECK****/
 	print_parse_tree(parseTree);
 	check_for_error();
-	print_new_maps();
+	//print_new_maps();
 
 	printf("\nSUCCESSFULLY PARSED INPUT!\n");
 	return 0;
