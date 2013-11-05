@@ -510,17 +510,32 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
 	rightop_type = print_expression_prefix(assign_stmt->expr);
     
-    //cout << "Rightop info "<<assign_stmt->id<< " is "<< rightop_type<<"\n";
+    //cout << "Rightop info "<<selected_id<< " is "<< rightop_type<<"\n";
 
     if(typevalue_to_typeid_map[assign_stmt->id] == 0)
       {
+
         typevalue_to_typeid_map[assign_stmt->id] = start_val + 1;
         start_val = start_val + 1;
+
+        temp_id_list.clear();
+        temp_id_list.push_back(assign_stmt->id);
+
+        //cout << "Inserting  "<<start_val<< "  "<<assign_stmt->id<<"\n";
+
+        varsec_typeid_to_ids_list_map[start_val] = temp_id_list;
+
+        temp_id_list.clear();
+
+        varsec_typename_order_list.push_back(assign_stmt->id);
+
         leftop_type = start_val;
 
         temp_id_set.clear();
-        //temp_id_set.insert(("%s",assign_stmt->id));
-        //typeid_to_ids_set_map[assign_stmt->id] = temp_id_set;
+        temp_id_set.insert(assign_stmt->id);
+
+        typeid_to_ids_set_map[leftop_type] = temp_id_set;
+
       }
     
     else
@@ -528,7 +543,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
         leftop_type = typevalue_to_typeid_map[assign_stmt->id];
       }
 	
-    //cout<< "Leftop info  "<<selected_id<<" is "<< leftop_type<<"\n";
+    //cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
 
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
@@ -579,12 +594,12 @@ int print_expression_prefix(struct exprNode* expr)
 	if (expr->tag == EXPR)
 	{
 		leftop_type = print_expression_prefix(expr->leftOperand);
-        cout << "\nLeftop type is "<<leftop_type<<"\n";
+        //cout << "\nLeftop type is "<<leftop_type<<"\n";
 
 		//printf("%s ", reserved[expr->oper]);
 
 		rightop_type = print_expression_prefix(expr->rightOperand);
-		cout << "\nRightop type is "<<rightop_type<<"\n";
+		//cout << "\nRightop type is "<<rightop_type<<"\n";
 
 		if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 		{
@@ -599,7 +614,7 @@ int print_expression_prefix(struct exprNode* expr)
 		}
 		else if (rightop_type > UD) 
 		{
-            cout << "Expected else if right op is greater than UD\n";
+            //cout << "Expected else if right op is greater than UD\n";
             update_builtin_id_type(rightop_type, leftop_type);
             selected_type = leftop_type;
    		}
@@ -625,9 +640,16 @@ int print_expression_prefix(struct exprNode* expr)
             {
                 typevalue_to_typeid_map[selected_id] = start_val + 1;
                 start_val = start_val + 1;
-                temp_typeid = start_val;
 
-                return temp_typeid;
+                temp_id_list.clear();
+                temp_id_list.push_back(selected_id);
+
+                varsec_typeid_to_ids_list_map[start_val] = temp_id_list;
+
+                temp_id_list.clear();
+            
+                   
+                return start_val;
             }
             else
             {
@@ -657,10 +679,17 @@ void update_builtin_id_type(int old_id, int new_id)
     temp_id_set.clear();
     temp_id_set_1.clear();
 
+    
+    //cout <<"\n old id is "<<old_id<<"\n";
+
+    //cout<< "\n New id is"<<new_id<<"\n";
+
 
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
 	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 	{
+
+        //cout << "\nfirst for looop\n";
 		typevalue_to_typeid_map[*sl_it] = new_id;
         temp_id_set.insert(*sl_it);
 	}	
@@ -668,23 +697,31 @@ void update_builtin_id_type(int old_id, int new_id)
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
 	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 	{
+        //cout<<"\n old id value is \n"<<old_id<<" "<<*sl_it_2;
+        //cout<< "\nsecond for looop"<<*sl_it_2<<"\n";
 		typevalue_to_typeid_map[*sl_it_2] = new_id;
-        temp_id_set_1.insert(*sl_it);
+        temp_id_set_1.insert(*sl_it_2);
 	}
 	
+    //cout << "\nout of second for looop\n";
+
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
 
     temp_id_set_1.clear();    
 
     temp_id_set_1 = typeid_to_ids_set_map[new_id];
+
+
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
-    
+   
     temp_id_set.clear();
     
     typeid_to_ids_set_map[old_id] = temp_id_set;
 
     temp_id_set_1.clear();
+
+    //cout<< "\nEnd of update built in method\n";
 } 
 
 
@@ -1363,7 +1400,7 @@ void print_ds()
 
 
 	//Print typevalue_to_typeid_map
-	cout<< "After third for loop in print ds"<<"\n";
+	//cout<< "After third for loop in print ds"<<"\n";
 	
 	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
 	{
@@ -1792,8 +1829,12 @@ void generate_final_output()
     for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
     {
         temp_typename = *sl_it;
+
+        //cout << "temp typname "<<temp_typename<<"\n";
         temp_typeid = typevalue_to_typeid_map[temp_typename];
         
+        //cout<< "temp type id "<<temp_typeid<<"\n";        
+
         temp_id_set = typeid_to_ids_set_map[temp_typeid];
 
         if (output_map.count(temp_typename)>0)
@@ -1819,10 +1860,15 @@ void print_final_output()
     for(ssm_it = output_map.begin(); ssm_it != output_map.end(); ssm_it++)
     {
         cout <<"\n"<< (*ssm_it).first<<" : ";
+
+        temp_id_set_1.clear();
+        temp_id_set_1.insert((*ssm_it).first);
+
         temp_id_set = (*ssm_it).second;
         for (ss_it = temp_id_set.begin(); ss_it!= temp_id_set.end(); ss_it++)
         {
-            if( built_in_types_set.count(*ss_it) == 0 )
+
+            if( built_in_types_set.count(*ss_it) == 0 && (temp_id_set_1.count(*ss_it)==0))
             {
                 cout<<*ss_it<<" ";
             }
