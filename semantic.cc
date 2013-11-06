@@ -596,7 +596,8 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	else if (leftop_type != rightop_type)
 	{
 		error_code_list.push_back(3);
-		//exit(0);
+        cout<< "ERROR CODE 3 \n";
+		exit(0);
 	}
 
 	//printf("; \n");
@@ -1564,38 +1565,32 @@ void check_for_error_typesec()
 	{
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
-		
+
+		seen_typesec_typename_set.insert(temp_typename);
+
 		//check for error code 0
-		if (seen_typesec_typename_set.count(temp_typename)!=0)
-		{
-			error_code_list.push_back(0);
-			//exit(0);
-		}
-
-		//check for error code 1
-		if ((seen_typesec_ids_set.count(temp_typename)==0) && (typesec_idset.count(temp_typename)>0))
-
-		{
-			error_code_list.push_back(0);
-			//exit(0);
-
-		}
-
-		//check for error code 2
 		temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 		for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 		{
 			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(0);
-				//exit(0);
+                cout<< "ERROR CODE 0\n";
+				exit(0);
 			}
 			seen_typesec_ids_set.insert(*sl_it_2);
 		}
 	
-		//Populating seen data structures
 	
-		seen_typesec_typename_set.insert(temp_typename);
+		//check for error code 1
+		if ((seen_typesec_ids_set.count(temp_typename)==0) && (typesec_idset.count(temp_typename)>0))
+
+		{
+			error_code_list.push_back(1);
+            cout<< "ERROR CODE 0\n";
+			exit(0);
+
+		}
 
 	} 
 }
@@ -1617,6 +1612,8 @@ void check_for_error_varsec()
 
 		{
 			error_code_list.push_back(1);
+            cout<<"ERROR CODE 1\n";
+            exit(0);
 
 		}
 
@@ -1626,11 +1623,16 @@ void check_for_error_varsec()
 		{
 			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
+                cout<<" DUPLICATE FOUND FOR "<<*sl_it_2<<"\n";
 				error_code_list.push_back(2);
+                cout<<"ERROR CODE 2\n";
+                exit(0);
 			}
 			if (seen_typesec_typename_set.count(*sl_it_2)>0 || seen_typesec_ids_set.count(*sl_it_2)>0)
 			{
 				error_code_list.push_back(1);
+                cout<<"ERROR CODE 1\n";
+                exit(0);
 			}
 			seen_varsec_ids_set.insert(*sl_it_2);
 		}
@@ -1923,7 +1925,7 @@ void check_for_error()
 
 	check_for_error_typesec();
 	check_for_error_varsec();
-	print_error();
+	//print_error();
 }
 
 void generate_final_output()
@@ -2247,13 +2249,12 @@ int main()
     populate_built_in_types_set();
 	play_with_ds();	
 	copy_varsec_typename_order_list();
-	check_for_error();
-	//print_ds();
+    print_ds();
 
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
     var_typeconversions();
-	//print_ds();
+	print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
@@ -2261,7 +2262,7 @@ int main()
 
 	/****BODY TYPECHECK****/
 	print_parse_tree(parseTree);
-	check_for_error();
+	//check_for_error();
 	//print_new_maps();
     //print_ds();
     //print_order_list();
