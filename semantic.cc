@@ -62,6 +62,8 @@ using namespace std;
 #define NOOP 39
 
 list<string> order_id_list(set<string> temp_id_set);
+void print_set(set<string> temp_id_set);
+void print_list(list<string> temp_id_list);
 
 //-------------------- Data structures -----------------------------------------
 
@@ -1513,6 +1515,7 @@ void print_ds()
 	// Print typsec_typelist and typesec_idlist 
 
 	//cout<< "After first for loop in print ds"<<"\n";
+    cout << "\nType sec typename to idlist map\n";
 	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
@@ -1527,6 +1530,7 @@ void print_ds()
 
 	// Print varsec_typelist and varsec_idlist
 	//cout<< "After second for loop in print ds"<<"\n";
+    cout << "\nVar sec typename to idlist map\n";
 	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
 	{
 		cout<<((*slm_it).first)<<" :";
@@ -1543,6 +1547,7 @@ void print_ds()
 	//Print typevalue_to_typeid_map
 	//cout<< "After third for loop in print ds"<<"\n";
 	
+    cout<< "\n Typevalue to typeid map\n";
 	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
 	{
 		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
@@ -1665,13 +1670,13 @@ void type_typeconversion()
 
             }
 
-			//update this change to rest of the vaues having this type
+			//update this change to rest of the children
 			temp_id_list = typesec_typename_to_idlist_map[temp_typename];
 			for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 			{
 				typevalue_to_typeid_map[*sl_it_2] = new_val;
             
-                if (seen_typesec_typename_set.count(*sl_it_2)>0)
+                if(typesec_typename_to_idlist_map.count(*sl_it_2)>0)
                 {
                     temp_id_list_2 = typesec_typename_to_idlist_map[*sl_it_2];
                     for(sl_it_3 = temp_id_list_2.begin(); sl_it_3 != temp_id_list_2.end(); sl_it_3++)
@@ -1680,7 +1685,7 @@ void type_typeconversion()
                     }
                 }
 
-                if (seen_varsec_typename_set.count(*sl_it_2)>0)
+                if (varsec_typename_to_idlist_map.count(*sl_it_2)>0)
                 {
                     temp_id_list_2 = varsec_typename_to_idlist_map[*sl_it_2];
                     for(sl_it_3 = temp_id_list_2.begin(); sl_it_3 != temp_id_list_2.end(); sl_it_3++)
@@ -1688,10 +1693,9 @@ void type_typeconversion()
                         typevalue_to_typeid_map[*sl_it_3] = new_val;
                     }
                 }
-			}
-
-		}
-	}
+		    }
+	   }
+    }
 }
 
 
@@ -1966,6 +1970,7 @@ void generate_final_output()
 
 void print_final_output()
 {
+    published_op_set.clear();
     for(vec_it = output_vector.begin(); vec_it != output_vector.end(); vec_it++)
     {
 
@@ -1975,8 +1980,6 @@ void print_final_output()
         }
 
         cout <<"\n"<< (*vec_it).first<<" : ";
-        temp_id_list.clear();
-        temp_id_list.push_back((*vec_it).first);
 
         published_op_set.insert((*vec_it).first);
 
@@ -1984,7 +1987,7 @@ void print_final_output()
         for (sl_it = temp_id_list.begin(); sl_it!= temp_id_list.end(); sl_it++)
         {
 
-            if( built_in_types_set.count(*sl_it) == 0 && (temp_id_set_1.count(*sl_it)==0))
+            if( built_in_types_set.count(*sl_it) == 0)
             {
                 cout<<*sl_it<<" ";
                 published_op_set.insert(*sl_it);
@@ -1993,6 +1996,29 @@ void print_final_output()
         cout<< "#";
     }
     cout<< "\n";
+}
+
+void print_set(set<string> temp_id_set)
+{
+    cout<<"\nPrinting temp id set\n";
+    for(ss_it = temp_id_set.begin(); ss_it != temp_id_set.end(); ss_it++)
+    {
+        cout<<" "<<*ss_it<<" ";
+    }
+    cout<<"\n";
+
+}
+
+void print_list(list<string> temp_id_list)
+{
+
+    cout<<"\n Printing temp id list\n";
+    for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
+    {
+        cout<<" "<<*sl_it<<" ";
+    }
+    cout<<"\n";
+
 }
 
 void order_output()
@@ -2009,11 +2035,10 @@ void order_output()
         {
             temp_id_set = output_map[temp_typename];
             temp_id_set.erase(temp_typename);
+            print_set(temp_id_set);
             temp_id_list = order_id_list(temp_id_set);
-
-             output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
-             temp_id_list.clear();
-             temp_id_set.clear();
+            print_list(temp_id_list);
+            output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
         }
     }
 
@@ -2030,8 +2055,6 @@ void order_output()
             temp_id_list = order_id_list(temp_id_set);
 
              output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
-             temp_id_list.clear();
-             temp_id_set.clear();
         }
     }
 
@@ -2048,8 +2071,6 @@ void order_output()
             temp_id_list = order_id_list(temp_id_set);
 
              output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
-             temp_id_list.clear();
-             temp_id_set.clear();
         }
 
     }
@@ -2105,7 +2126,7 @@ list<string> order_id_list(set<string> temp_id_set)
 void format_output()
 {
     generate_final_output();
-    //print_output_map();
+    print_output_map();
     order_output();
     print_final_output();
     //print_output_map();
@@ -2201,7 +2222,7 @@ void print_order_list()
 void print_output_map()
 {
 
-    cout<<"Output map \n";
+    cout<<"\nOutput map \n";
     for(ssm_it = output_map.begin(); ssm_it != output_map.end(); ssm_it++)
     {
         cout<<"\n"<< (*ssm_it).first<<" : ";
@@ -2210,6 +2231,7 @@ void print_output_map()
                 cout<<" "<<*ss_it<<" ";
             }
     }
+    cout<<"\n\n";
 
 }
 
@@ -2245,7 +2267,7 @@ int main()
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    //print_order_explicit_or_implicit_info();    
+    print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
