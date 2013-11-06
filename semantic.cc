@@ -122,13 +122,12 @@ set<string> :: iterator ss_it; 				// string set iterator
 set<string>  temp_id_set;
 set<string> temp_id_set_1;
 set<string> built_in_types_set;
-
+set<string> published_op_set;
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
 map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
-map<string, list<string> > parent_to_childlist_map;
 
 
 map<int, list<string> > typesec_typeid_to_ids_list_map;
@@ -1390,9 +1389,9 @@ void play_with_order_ds()
             
         for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
         {
-            if(typevalue_to_typeid_map.count(*sl_it)==0)
+            if(type_decl_map.count(*sl_it)==0)
                 {
-                    typevalue_to_typeid_map[*sl_it] = 1;
+                    type_decl_map[*sl_it] = 1;
                     type_explicit_list.push_back(*sl_it);
                 }
         }
@@ -1483,7 +1482,7 @@ void play_with_ds()
 void print_order_ds()
 {
 
-    cout<<"UO TYPESEC MAP \n";
+    //cout<<"UO TYPESEC MAP \n";
     for(usl_it = uo_typesec_map.begin(); usl_it != uo_typesec_map.end(); usl_it++)
     {
         cout<<((*usl_it).first)<<" :";
@@ -1497,7 +1496,7 @@ void print_order_ds()
     }
     cout<<"\n\n";
 
-    cout<<"UO VARSEC MAP \n";
+    //cout<<"UO VARSEC MAP \n";
     for(usl_it = uo_varsec_map.begin(); usl_it != uo_varsec_map.end(); usl_it++)
     {
         cout<<((*usl_it).first)<<" :";
@@ -1789,6 +1788,9 @@ void get_varsec_typeid_to_ids_list_map()
 
 void print_new_maps()
 {
+
+    cout << "\ntypesec_typeid_to_ids_list_map\n";
+
 	for(ilm_it = typesec_typeid_to_ids_list_map.begin(); ilm_it != typesec_typeid_to_ids_list_map.end(); ilm_it++)
 	{
 		cout<< (*ilm_it).first<<":";
@@ -1803,6 +1805,8 @@ void print_new_maps()
 
     cout << "\n";
 
+
+    cout<<"varsec_typeid_to_ids_list_map\n";
 	for(ilm_it = varsec_typeid_to_ids_list_map.begin(); ilm_it != varsec_typeid_to_ids_list_map.end(); ilm_it++)
 	{
 		cout<< (*ilm_it).first<<":";
@@ -1817,6 +1821,7 @@ void print_new_maps()
 
 	cout<<"\n";
 
+    cout<<"typeid_to_ids_set_map\n";
 	for(ism_it = typeid_to_ids_set_map.begin(); ism_it != typeid_to_ids_set_map.end(); ism_it++)
 	{
 		cout<< (*ism_it).first<<":";
@@ -1920,43 +1925,6 @@ void check_for_error()
 	print_error();
 }
 
-void form_parent_to_childlist_map()
-{
-
-    for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it != typesec_typename_to_idlist_map.end(); slm_it++)
-    {
-        parent_to_childlist_map[((*slm_it).first)] = (*slm_it).second;
-
-    }
-
-    for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it != varsec_typename_to_idlist_map.end(); slm_it++)
-    {
-        temp_typename = (*slm_it).first;
-        temp_id_list = (*slm_it).second;
-
-
-        if (parent_to_childlist_map.count(temp_typename)>0)
-        {
-            temp_id_list_2 = parent_to_childlist_map[temp_typename];
-
-            for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
-            {
-                    temp_id_list_2.push_back(*sl_it);                
-                
-            }
-            parent_to_childlist_map[temp_typename] = temp_id_list_2;    
-        }
-
-        else
-        {
-            parent_to_childlist_map[temp_typename] = temp_id_list;
-
-        }
-
-    }
-
-}
-
 void generate_final_output()
 {
 
@@ -2001,13 +1969,19 @@ void generate_final_output()
 
 void print_final_output()
 {
-
     for(vec_it = output_vector.begin(); vec_it != output_vector.end(); vec_it++)
     {
-        cout <<"\n"<< (*vec_it).first<<" : ";
 
+        if(published_op_set.count((*vec_it).first)>0)
+        {
+            continue;
+        }
+
+        cout <<"\n"<< (*vec_it).first<<" : ";
         temp_id_list.clear();
         temp_id_list.push_back((*vec_it).first);
+
+        published_op_set.insert((*vec_it).first);
 
         temp_id_list = (*vec_it).second;
         for (sl_it = temp_id_list.begin(); sl_it!= temp_id_list.end(); sl_it++)
@@ -2016,6 +1990,7 @@ void print_final_output()
             if( built_in_types_set.count(*sl_it) == 0 && (temp_id_set_1.count(*sl_it)==0))
             {
                 cout<<*sl_it<<" ";
+                published_op_set.insert(*sl_it);
             }
         }
         cout<< "#";
@@ -2036,6 +2011,7 @@ void order_output()
         if(output_map.count(temp_typename)>0)
         {
             temp_id_set = output_map[temp_typename];
+            temp_id_set.erase(temp_typename);
             temp_id_list = order_id_list(temp_id_set);
 
              output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
@@ -2053,6 +2029,7 @@ void order_output()
         if(output_map.count(temp_typename)>0)
         {
             temp_id_set = output_map[temp_typename];
+            temp_id_set.erase(temp_typename);
             temp_id_list = order_id_list(temp_id_set);
 
              output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
@@ -2070,6 +2047,7 @@ void order_output()
         if(output_map.count(temp_typename)>0)
         {
             temp_id_set = output_map[temp_typename];
+            temp_id_set.erase(temp_typename);
             temp_id_list = order_id_list(temp_id_set);
 
              output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
@@ -2102,7 +2080,7 @@ list<string> order_id_list(set<string> temp_id_set)
         {
             temp_id_list.push_back(*sl_it);
         }
-        //cout<<"\n type implicit\n";
+       //cout<<"\n type implicit\n";
     }
 
     for(sl_it = var_explicit_list.begin(); sl_it != var_explicit_list.end(); sl_it++)
@@ -2129,10 +2107,11 @@ list<string> order_id_list(set<string> temp_id_set)
 
 void format_output()
 {
-    form_parent_to_childlist_map();
     generate_final_output();
+    //print_output_map();
     order_output();
     print_final_output();
+    //print_output_map();
 }
 
 
@@ -2222,6 +2201,21 @@ void print_order_list()
 
 }
 
+void print_output_map()
+{
+
+    cout<<"Output map \n";
+    for(om_it = output_map.begin(); om_it != output_map.end(); om_it++)
+    {
+        cout<<"\n"<< (*om_it).first<<" : ";
+        for(ss_it = (*om_it).second.begin(); ss_it != (*om_it).second.end(); ss_it++)
+            {
+                cout<<" "<<*ss_it<<" ";
+            }
+    }
+
+}
+
 // COMMON mistakes:
 //    *     = instead of ==
 //    *     not allocating space before strcpy
@@ -2251,10 +2245,10 @@ int main()
 	check_for_error();
 	//print_new_maps();
     //print_ds();
-    print_order_list();
+    //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    print_order_explicit_or_implicit_info();    
+    //print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
