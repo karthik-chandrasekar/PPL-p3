@@ -62,6 +62,7 @@ using namespace std;
 #define RBRACE 38
 #define NOOP 39
 
+list<string> order_id_list(set<string> temp_id_set);
 
 //-------------------- Data structures -----------------------------------------
 
@@ -105,7 +106,7 @@ list<string> type_explicit_list;
 list<string> type_implicit_list;
 list<string> var_explicit_list;
 list<string> var_implicit_list;
-
+list<string> built_in_types_list;
 
 //Set
 
@@ -121,6 +122,7 @@ set<string> :: iterator ss_it; 				// string set iterator
 set<string>  temp_id_set;
 set<string> temp_id_set_1;
 set<string> built_in_types_set;
+
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
@@ -152,9 +154,9 @@ unordered_map<string, set<string> > :: iterator om_it;
 
 //Vector
 
-vector<pair<string, set<string> > > output_vector;
+vector<pair<string, list<string> > > output_vector;
 
-vector<pair<string, set<string> > > :: iterator vec_it;
+vector<pair<string, list<string> > > :: iterator vec_it;
 
 vector<pair<string, list<string> > > uo_typesec_map;
 vector<pair<string, list<string> > > uo_varsec_map;
@@ -1966,7 +1968,6 @@ void generate_final_output()
         temp_id_set = typeid_to_ids_set_map[temp_typeid];
         
         output_map[temp_typename] = temp_id_set;
-        output_vector.push_back(make_pair(temp_typename, temp_id_set));
 
     }
 
@@ -1988,13 +1989,11 @@ void generate_final_output()
             temp_id_set_1.insert(temp_id_set.begin(), temp_id_set.end());
             
             output_map[temp_typename] = temp_id_set_1;
-            output_vector.push_back(make_pair(temp_typename, temp_id_set_1));
         }
         else
         {
             output_map[temp_typename] = temp_id_set;
 
-            output_vector.push_back(make_pair(temp_typename, temp_id_set));
         }
     }
 }
@@ -2007,16 +2006,16 @@ void print_final_output()
     {
         cout <<"\n"<< (*vec_it).first<<" : ";
 
-        temp_id_set_1.clear();
-        temp_id_set_1.insert((*vec_it).first);
+        temp_id_list.clear();
+        temp_id_list.push_back((*vec_it).first);
 
-        temp_id_set = (*vec_it).second;
-        for (ss_it = temp_id_set.begin(); ss_it!= temp_id_set.end(); ss_it++)
+        temp_id_list = (*vec_it).second;
+        for (sl_it = temp_id_list.begin(); sl_it!= temp_id_list.end(); sl_it++)
         {
 
-            if( built_in_types_set.count(*ss_it) == 0 && (temp_id_set_1.count(*ss_it)==0))
+            if( built_in_types_set.count(*sl_it) == 0 && (temp_id_set_1.count(*sl_it)==0))
             {
-                cout<<*ss_it<<" ";
+                cout<<*sl_it<<" ";
             }
         }
         cout<< "#";
@@ -2024,10 +2023,115 @@ void print_final_output()
     cout<< "\n";
 }
 
+void order_output()
+{
+
+    // FOR BUILTIN TYPES
+
+    output_vector.clear();
+
+    for(sl_it_2 = built_in_types_list.begin(); sl_it_2 != built_in_types_list.end(); sl_it_2++)
+    {
+        temp_typename = *sl_it_2;
+        if(output_map.count(temp_typename)>0)
+        {
+            temp_id_set = output_map[temp_typename];
+            temp_id_list = order_id_list(temp_id_set);
+
+             output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
+             temp_id_list.clear();
+             temp_id_set.clear();
+        }
+    }
+
+
+    // TYPE IMPLICIT 
+
+    for(sl_it_2 = type_implicit_list.begin(); sl_it_2!= type_implicit_list.end(); sl_it_2++)
+    {
+        temp_typename = *sl_it_2;
+        if(output_map.count(temp_typename)>0)
+        {
+            temp_id_set = output_map[temp_typename];
+            temp_id_list = order_id_list(temp_id_set);
+
+             output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
+             temp_id_list.clear();
+             temp_id_set.clear();
+        }
+    }
+
+    // VAR IMPLICIT
+    
+    for(sl_it_2 = var_implicit_list.begin(); sl_it_2 != var_implicit_list.end(); sl_it_2++)
+    {
+       
+        temp_typename = *sl_it_2;
+        if(output_map.count(temp_typename)>0)
+        {
+            temp_id_set = output_map[temp_typename];
+            temp_id_list = order_id_list(temp_id_set);
+
+             output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
+             temp_id_list.clear();
+             temp_id_set.clear();
+        }
+
+    }
+}
+
+list<string> order_id_list(set<string> temp_id_set)
+{
+
+    //cout<< "\n Entered into order id list\n";
+    temp_id_list.clear();
+    
+    for(sl_it = type_explicit_list.begin(); sl_it != type_explicit_list.end(); sl_it++)
+    {
+        if(temp_id_set.count(*sl_it)>0 && built_in_types_set.count(*sl_it)==0)
+            {
+                temp_id_list.push_back(*sl_it);
+            }
+        //cout<<"\n type explicit\n";
+
+    }
+
+    for(sl_it = type_implicit_list.begin(); sl_it != type_implicit_list.end(); sl_it++)
+    {
+        if(temp_id_set.count(*sl_it)>0)
+        {
+            temp_id_list.push_back(*sl_it);
+        }
+        //cout<<"\n type implicit\n";
+    }
+
+    for(sl_it = var_explicit_list.begin(); sl_it != var_explicit_list.end(); sl_it++)
+    {
+        if(temp_id_set.count(*sl_it)>0)
+        {
+            temp_id_list.push_back(*sl_it);
+        }
+        //cout<<"\n var explicit\n";
+    }
+
+    for(sl_it = var_implicit_list.begin(); sl_it != var_implicit_list.end(); sl_it++)
+    {
+        if(temp_id_set.count(*sl_it)>0)
+        {
+            temp_id_list.push_back(*sl_it);
+        }
+        //cout<<"\n var implicit\n";
+    }
+   
+    //cout<<"\nReturning from order id lsit\n"; 
+    return temp_id_list;
+}
+
 void format_output()
 {
     form_parent_to_childlist_map();
     generate_final_output();
+    order_output();
     print_final_output();
 }
 
@@ -2038,6 +2142,11 @@ void populate_built_in_types_set()
     built_in_types_set.insert("REAL");
     built_in_types_set.insert("STRING");
     built_in_types_set.insert("BOOLEAN");
+
+    built_in_types_list.push_back("INT");
+    built_in_types_list.push_back("REAL");
+    built_in_types_list.push_back("STRING");
+    built_in_types_list.push_back("BOOLEAN");
 }
 
 void print_order_explicit_or_implicit_info()
