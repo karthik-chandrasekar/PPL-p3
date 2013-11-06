@@ -141,7 +141,11 @@ void print_stmt_list(struct stmt_listNode* stmt_list);
 void print_stmt(struct stmtNode* stmt);
 void print_assign_stmt(struct assign_stmtNode* assign_stmt);
 int print_expression_prefix(struct exprNode* expr);
-
+void print_order_explicit_or_implicit_info();
+void print_order_ds();
+void print_order_list();
+void order_output();
+void print_output_map();
 
 //Newly added
 
@@ -157,6 +161,7 @@ void generate_fina_output();
 void form_parent_to_childlist_map();
 void print_final_output();
 void populate_built_in_types_set();
+void play_with_order_ds();
 
 /*------------------------------------------------------------------------
   PARSING FUNCTIONS
