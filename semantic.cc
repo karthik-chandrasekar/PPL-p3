@@ -1200,6 +1200,14 @@ struct var_declNode* var_decl()
 		if (ttype == COLON)
 		{	varDecl->type_name = type_name();
 
+            if(varsec_typename_to_idlist_map.count(temp_type_string)>0)
+            {
+                old_id_list = varsec_typename_to_idlist_map[temp_type_string];
+                for(sl_it = old_id_list.begin(); sl_it != old_id_list.end(); sl_it++)
+                {
+                    temp_id_list.push_back(*sl_it);
+                }
+            }
 			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 
             uo_varsec_map.push_back(make_pair(temp_type_string, temp_id_list));
@@ -1605,6 +1613,11 @@ void check_for_error_varsec()
 		//cout<<"\n"<<"Inside for loop of check error for var sec"<<*sl_it<<"\n";
 		temp_typename = *sl_it;
 		temp_typeid = typevalue_to_typeid_map[temp_typename];
+
+        if(seen_varsec_typename_set.count(temp_typename)>0)
+        {
+            continue;
+        }
 	
 
 		//check for error code 1
@@ -1623,7 +1636,6 @@ void check_for_error_varsec()
 		{
 			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
-                cout<<" DUPLICATE FOUND FOR "<<*sl_it_2<<"\n";
 				error_code_list.push_back(2);
                 cout<<"ERROR CODE 2\n";
                 exit(0);
@@ -2249,12 +2261,13 @@ int main()
     populate_built_in_types_set();
 	play_with_ds();	
 	copy_varsec_typename_order_list();
-    print_ds();
+    //print_ds();
+	check_for_error();
 
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
     var_typeconversions();
-	print_ds();
+    //print_ds();
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
