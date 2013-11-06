@@ -2035,9 +2035,9 @@ void order_output()
         {
             temp_id_set = output_map[temp_typename];
             temp_id_set.erase(temp_typename);
-            print_set(temp_id_set);
+            //print_set(temp_id_set);
             temp_id_list = order_id_list(temp_id_set);
-            print_list(temp_id_list);
+            //print_list(temp_id_list);
             output_vector.push_back(make_pair(temp_typename, temp_id_list)); 
         }
     }
@@ -2126,7 +2126,7 @@ list<string> order_id_list(set<string> temp_id_set)
 void format_output()
 {
     generate_final_output();
-    print_output_map();
+    //print_output_map();
     order_output();
     print_final_output();
     //print_output_map();
@@ -2267,7 +2267,7 @@ int main()
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    print_order_explicit_or_implicit_info();    
+    //print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
