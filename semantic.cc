@@ -11,7 +11,8 @@
 #include <list>
 #include <ios>
 #include <fstream>
-#include<unordered_map>
+#include <unordered_map>
+#include <vector>
 
 using namespace std;
 
@@ -127,17 +128,14 @@ map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, list<string> > parent_to_childlist_map;
 
-unordered_map <string, list<string> > uo_typesec_map;
-unordered_map <string, list<string> > uo_varsec_map;
 
 map<int, list<string> > typesec_typeid_to_ids_list_map;
 map<int, list<string> > varsec_typeid_to_ids_list_map;
 map<int, set<string> > typeid_to_ids_set_map;
 map<int, list<string> > typeid_to_ids_list_map;
-map<string, set<string> > output_map;
+unordered_map<string, set<string> > output_map;
 unordered_map<string, int> type_decl_map;
 unordered_map<string, int> var_decl_map;
-
 
 
 //Map Iterator
@@ -149,8 +147,19 @@ map<int, set<string> > :: iterator ism_it;						//ism_it = int_to_set_map_it
 map<string, set<string> > :: iterator ssm_it;                   //ssm_it = string_to_set_map_it
 
 unordered_map<string, int> :: iterator usi_it;
-unordered_map<string, list<string> > :: iterator usl_it;
+unordered_map<string, set<string> > :: iterator om_it;
 
+
+//Vector
+
+vector<pair<string, set<string> > > output_vector;
+
+vector<pair<string, set<string> > > :: iterator vec_it;
+
+vector<pair<string, list<string> > > uo_typesec_map;
+vector<pair<string, list<string> > > uo_varsec_map;
+
+vector<pair<string, list<string> > > :: iterator usl_it;
 //------------------- reserved words and token strings -----------------------
 
 
@@ -1158,7 +1167,7 @@ struct type_declNode* type_decl()
             
 		    typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
 
-            uo_typesec_map[temp_type_string] = temp_id_list;
+            uo_typesec_map.push_back(make_pair(temp_type_string, temp_id_list));
 
             temp_id_list.clear();            
 
@@ -1191,7 +1200,8 @@ struct var_declNode* var_decl()
 		{	varDecl->type_name = type_name();
 
 			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
-            uo_varsec_map[temp_type_string] = temp_id_list;
+
+            uo_varsec_map.push_back(make_pair(temp_type_string, temp_id_list));
 
 			temp_id_list.clear();	
 			ttype = getToken();
@@ -1956,6 +1966,7 @@ void generate_final_output()
         temp_id_set = typeid_to_ids_set_map[temp_typeid];
         
         output_map[temp_typename] = temp_id_set;
+        output_vector.push_back(make_pair(temp_typename, temp_id_set));
 
     }
 
@@ -1977,11 +1988,13 @@ void generate_final_output()
             temp_id_set_1.insert(temp_id_set.begin(), temp_id_set.end());
             
             output_map[temp_typename] = temp_id_set_1;
+            output_vector.push_back(make_pair(temp_typename, temp_id_set_1));
         }
         else
         {
             output_map[temp_typename] = temp_id_set;
 
+            output_vector.push_back(make_pair(temp_typename, temp_id_set));
         }
     }
 }
@@ -1990,14 +2003,14 @@ void generate_final_output()
 void print_final_output()
 {
 
-    for(ssm_it = output_map.begin(); ssm_it != output_map.end(); ssm_it++)
+    for(vec_it = output_vector.begin(); vec_it != output_vector.end(); vec_it++)
     {
-        cout <<"\n"<< (*ssm_it).first<<" : ";
+        cout <<"\n"<< (*vec_it).first<<" : ";
 
         temp_id_set_1.clear();
-        temp_id_set_1.insert((*ssm_it).first);
+        temp_id_set_1.insert((*vec_it).first);
 
-        temp_id_set = (*ssm_it).second;
+        temp_id_set = (*vec_it).second;
         for (ss_it = temp_id_set.begin(); ss_it!= temp_id_set.end(); ss_it++)
         {
 
@@ -2113,7 +2126,7 @@ int main()
 	play_with_ds();	
 	copy_varsec_typename_order_list();
 	check_for_error();
-	print_ds();
+	//print_ds();
 
 	/****TYPE CONVERSIONS****/
 	type_typeconversion();
@@ -2130,7 +2143,7 @@ int main()
 	//print_new_maps();
     //print_ds();
     print_order_list();
-    print_order_ds();
+    //print_order_ds();
     play_with_order_ds();
     print_order_explicit_or_implicit_info();    
 
