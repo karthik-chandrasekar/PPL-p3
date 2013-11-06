@@ -127,6 +127,9 @@ map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
 map<string, list<string> > parent_to_childlist_map;
 
+unordered_map <string, list<string> > uo_typesec_map;
+unordered_map <string, list<string> > uo_varsec_map;
+
 map<int, list<string> > typesec_typeid_to_ids_list_map;
 map<int, list<string> > varsec_typeid_to_ids_list_map;
 map<int, set<string> > typeid_to_ids_set_map;
@@ -146,6 +149,7 @@ map<int, set<string> > :: iterator ism_it;						//ism_it = int_to_set_map_it
 map<string, set<string> > :: iterator ssm_it;                   //ssm_it = string_to_set_map_it
 
 unordered_map<string, int> :: iterator usi_it;
+unordered_map<string, list<string> > :: iterator usl_it;
 
 //------------------- reserved words and token strings -----------------------
 
@@ -1153,6 +1157,9 @@ struct type_declNode* type_decl()
 		{	typeDecl->type_name = type_name();
             
 		    typesec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+
+            uo_typesec_map[temp_type_string] = temp_id_list;
+
             temp_id_list.clear();            
 
 			ttype = getToken();
@@ -1184,6 +1191,8 @@ struct var_declNode* var_decl()
 		{	varDecl->type_name = type_name();
 
 			varsec_typename_to_idlist_map[temp_type_string] = temp_id_list;
+            uo_varsec_map[temp_type_string] = temp_id_list;
+
 			temp_id_list.clear();	
 			ttype = getToken();
 			if (ttype == SEMICOLON)
@@ -1348,17 +1357,12 @@ struct programNode* program()
 }
 
 
-void play_with_ds()
+void play_with_order_ds()
 {
 
-	// Populate typsec_typelist and typesec_idlist 
-
-	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
-	{
-
-        temp_typename = (*slm_it).first;
-		typesec_typelist.push_back(temp_typename);
-
+    for(usl_it = uo_typesec_map.begin(); usl_it != uo_typesec_map.end(); usl_it++)
+    {
+        temp_typename = (*usl_it).first;
         if(type_decl_map.count(temp_typename)==0 && built_in_types_set.count(temp_typename)==1)
           {
                 type_decl_map[temp_typename] = 1;
@@ -1371,34 +1375,22 @@ void play_with_ds()
                 type_implicit_list.push_back(temp_typename);
           }
 
-
-
-        temp_typeid = typevalue_to_typeid_map[(*slm_it).first];
-        
-    			
-		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
-		{
-			typesec_idlist.push_back(*sl_it);
-			typesec_idset.insert(*sl_it);
-            typevalue_to_typeid_map[*sl_it] = temp_typeid;
-
+            
+        for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
+        {
             if(typevalue_to_typeid_map.count(*sl_it)==0)
                 {
                     typevalue_to_typeid_map[*sl_it] = 1;
                     type_explicit_list.push_back(*sl_it);
                 }
-			
-		}	
-	}
+        }
+    }
 
-	// Populate varsec_typelist and varsec_idlist
 
-	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
-	{
 
-        temp_typename = (*slm_it).first;
-		varsec_typelist.push_back(temp_typename);
-
+   for(usl_it = uo_varsec_map.begin(); usl_it != uo_varsec_map.end(); usl_it++)
+   {
+        temp_typename = (*usl_it).first; 
         if(type_decl_map.count(temp_typename)==0)
         {
             if(built_in_types_set.count(temp_typename) == 0)
@@ -1413,6 +1405,54 @@ void play_with_ds()
             }
 
         }
+        
+        for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
+        {
+            if(var_decl_map.count(*sl_it)==0)
+            {
+                var_decl_map[*sl_it] = 1;
+                var_explicit_list.push_back(*sl_it);
+            }
+
+        }
+   }
+
+}
+
+
+void play_with_ds()
+{
+
+	// Populate typsec_typelist and typesec_idlist 
+
+	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
+	{
+
+        temp_typename = (*slm_it).first;
+		typesec_typelist.push_back(temp_typename);
+
+
+
+        temp_typeid = typevalue_to_typeid_map[(*slm_it).first];
+        
+    			
+		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
+		{
+			typesec_idlist.push_back(*sl_it);
+			typesec_idset.insert(*sl_it);
+            typevalue_to_typeid_map[*sl_it] = temp_typeid;
+
+		}	
+	}
+
+	// Populate varsec_typelist and varsec_idlist
+
+	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
+	{
+
+        temp_typename = (*slm_it).first;
+		varsec_typelist.push_back(temp_typename);
+
 		
         temp_typeid = typevalue_to_typeid_map[(*slm_it).first];
 
@@ -1422,16 +1462,43 @@ void play_with_ds()
 			varsec_idset.insert(*sl_it);
             typevalue_to_typeid_map[*sl_it] = temp_typeid;
 
-            if(var_decl_map.count(*sl_it)==0)
-            {
-                var_decl_map[*sl_it] = 1;
-                var_explicit_list.push_back(*sl_it);
-            }
 
 		}
 	}
 }
 
+
+void print_order_ds()
+{
+
+    cout<<"UO TYPESEC MAP \n";
+    for(usl_it = uo_typesec_map.begin(); usl_it != uo_typesec_map.end(); usl_it++)
+    {
+        cout<<((*usl_it).first)<<" :";
+
+        for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
+        {
+            cout<<(*sl_it)<<" ,";
+        }
+        cout<<"\n";
+    
+    }
+    cout<<"\n\n";
+
+    cout<<"UO VARSEC MAP \n";
+    for(usl_it = uo_varsec_map.begin(); usl_it != uo_varsec_map.end(); usl_it++)
+    {
+        cout<<((*usl_it).first)<<" :";
+
+        for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
+        {
+            cout<<(*sl_it)<<" ,";
+        }
+        cout<<"\n";
+    
+    }
+    cout<<"\n\n";
+}
 
 void print_ds()
 {
@@ -2015,6 +2082,24 @@ void print_order_explicit_or_implicit_info()
     cout<<"\n";
 }
 
+void print_order_list()
+{
+    cout<<"PRINTING TYPESEC TYPENAME ORDER LIST";
+    for(sl_it = typesec_typename_order_list.begin(); sl_it != typesec_typename_order_list.end(); sl_it++)
+    {
+        cout<< "  "<<*sl_it<<" ";
+    }
+    cout<< "\n";
+
+    cout<<"PRINTING VARSEC TYPENAME ORDER LIST";
+    for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
+    {
+        cout<<" "<<*sl_it<<" ";
+    }
+    cout<<"\n";
+
+}
+
 // COMMON mistakes:
 //    *     = instead of ==
 //    *     not allocating space before strcpy
@@ -2044,6 +2129,9 @@ int main()
 	check_for_error();
 	//print_new_maps();
     //print_ds();
+    print_order_list();
+    print_order_ds();
+    play_with_order_ds();
     print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
