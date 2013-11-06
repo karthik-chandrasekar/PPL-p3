@@ -11,7 +11,6 @@
 #include <list>
 #include <ios>
 #include <fstream>
-#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -134,9 +133,9 @@ map<int, list<string> > typesec_typeid_to_ids_list_map;
 map<int, list<string> > varsec_typeid_to_ids_list_map;
 map<int, set<string> > typeid_to_ids_set_map;
 map<int, list<string> > typeid_to_ids_list_map;
-unordered_map<string, set<string> > output_map;
-unordered_map<string, int> type_decl_map;
-unordered_map<string, int> var_decl_map;
+map<string, set<string> > output_map;
+map<string, int> type_decl_map;
+map<string, int> var_decl_map;
 
 
 //Map Iterator
@@ -147,8 +146,6 @@ map<int, list<string> > :: iterator ilm_it; 						//ilm_it = int_to_list_map_it
 map<int, set<string> > :: iterator ism_it;						//ism_it = int_to_set_map_it
 map<string, set<string> > :: iterator ssm_it;                   //ssm_it = string_to_set_map_it
 
-unordered_map<string, int> :: iterator usi_it;
-unordered_map<string, set<string> > :: iterator om_it;
 
 
 //Vector
@@ -2133,19 +2130,19 @@ void print_order_explicit_or_implicit_info()
     //PRINT type_decl_map
 
     cout<<"\n TYPE DECL MAP";
-    for(usi_it = type_decl_map.begin(); usi_it != type_decl_map.end(); usi_it++)
+    for(nid_it = type_decl_map.begin(); nid_it != type_decl_map.end(); nid_it++)
      {
-        temp_typename = (*usi_it).first; 
-        cout<<"\n"<<temp_typename<<" : "<< (*usi_it).second;
+        temp_typename = (*nid_it).first; 
+        cout<<"\n"<<temp_typename<<" : "<< (*nid_it).second;
 
      } 
 
     //PRINT var_decl_map
 
     cout<<"\n VAR DECL MAP";
-    for(usi_it = var_decl_map.begin(); usi_it != var_decl_map.end(); usi_it++)
+    for(nid_it = var_decl_map.begin(); nid_it != var_decl_map.end(); nid_it++)
     {
-        cout<<"\n"<<(*usi_it).first<<" : "<<(*usi_it).second;
+        cout<<"\n"<<(*nid_it).first<<" : "<<(*nid_it).second;
     }
 
 
@@ -2205,10 +2202,10 @@ void print_output_map()
 {
 
     cout<<"Output map \n";
-    for(om_it = output_map.begin(); om_it != output_map.end(); om_it++)
+    for(ssm_it = output_map.begin(); ssm_it != output_map.end(); ssm_it++)
     {
-        cout<<"\n"<< (*om_it).first<<" : ";
-        for(ss_it = (*om_it).second.begin(); ss_it != (*om_it).second.end(); ss_it++)
+        cout<<"\n"<< (*ssm_it).first<<" : ";
+        for(ss_it = (*ssm_it).second.begin(); ss_it != (*ssm_it).second.end(); ss_it++)
             {
                 cout<<" "<<*ss_it<<" ";
             }
