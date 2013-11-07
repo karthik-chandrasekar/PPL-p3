@@ -147,7 +147,9 @@ void print_order_list();
 void order_output();
 void print_output_map();
 void print_condition(struct conditionNode* condition);
-void print_operand(struct primaryNode* primary);
+int print_operand(struct primaryNode* primary);
+void add_builtin_typeid();
+
 
 //Newly added
 
