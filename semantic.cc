@@ -614,11 +614,12 @@ void print_condition(struct conditionNode* condition)
     cout<<"WHILE ";
     if (condition->left_operand != NULL)
         print_operand(condition->left_operand);
-    else if (condition -> right_operand != NULL)
+     if (condition -> right_operand != NULL)
     {
         printf("%d", condition->relop);
         print_operand(condition->right_operand);
     }
+    cout<<"\n";
 }
 
 
@@ -680,7 +681,7 @@ int print_expression_prefix(struct exprNode* expr)
 		}
 		else if (rightop_type > UD) 
 		{
-            cout << "Expected else if right op is greater than UD\n";
+            //cout << "Expected else if right op is greater than UD\n";
             update_builtin_id_type(rightop_type, leftop_type);
             selected_type = leftop_type;
    		}
@@ -1039,12 +1040,12 @@ struct assign_stmtNode* assign_stmt()
 
 struct primaryNode* primary()
 {
-    cout<<"\n Inside Primary node\n";
+    //cout<<"\n Inside Primary node\n";
 
     struct primaryNode* primNode;
 
     ttype = getToken();
-    cout<<"\n Got TOken " << ttype <<"\n";
+    //cout<<"\n Got TOken " << ttype <<"\n";
     if (ttype == ID)
     {
         primNode = make_primaryNode();
@@ -1080,7 +1081,7 @@ struct conditionNode* condition()
 {
     struct conditionNode* condNode;
 
-    cout << "\n Inside condition node\n";
+    //cout << "\n Inside condition node\n";
 
     condNode = make_conditionNode();
     ttype = getToken();
@@ -1088,14 +1089,14 @@ struct conditionNode* condition()
     if(ttype == ID || ttype == NUM || ttype == REALNUM)
     {
         ungetToken();
-        cout << "\ncalling primary for left op\n";
+        //cout << "\ncalling primary for left op\n";
         condNode -> left_operand = primary();
         
         ttype = getToken();
         if(ttype == GREATER || ttype == GTEQ || ttype ==LESS || ttype == NOTEQUAL || ttype == LTEQ)
         {
 
-            cout<<"\nGot relop as" << ttype<<"\n";
+            //cout<<"\nGot relop as" << ttype<<"\n";
             condNode->relop = ttype;
         }
         else
@@ -1105,11 +1106,11 @@ struct conditionNode* condition()
             return condNode;
         }    
 
-        cout << "\ncalling primary for right op\n";
+        //cout << "\ncalling primary for right op\n";
             
         condNode -> right_operand = primary();
         
-        cout<< "\nreturning cond node\n"; 
+        //cout<< "\nreturning cond node\n"; 
         return condNode;
     }
     else
