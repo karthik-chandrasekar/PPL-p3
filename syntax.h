@@ -149,7 +149,7 @@ void print_output_map();
 void print_condition(struct conditionNode* condition);
 int print_operand(struct primaryNode* primary);
 void add_builtin_typeid();
-
+void fill_typevalues_for_built_in();
 
 //Newly added
 
