@@ -451,10 +451,10 @@ void print_decl(struct declNode* dec)
 
 void print_body(struct bodyNode* body)
 {
-    cout<<"Inside print body";
-	//printf("{\n");
+    //cout<<"Inside print body";
+	printf("{\n");
 	print_stmt_list(body->stmt_list); 
-	//printf("}\n");
+    printf("}\n");
 	
 }
 
@@ -523,7 +523,7 @@ void print_id_list(struct id_listNode* idList)
 void print_stmt_list(struct stmt_listNode* stmt_list)
 {
 
-    cout<<"\nprint stmt list\n";
+    //cout<<"\nprint stmt list\n";
 	print_stmt(stmt_list->stmt);	
 	if (stmt_list->stmt_list != NULL)
 		print_stmt_list(stmt_list->stmt_list);
@@ -612,10 +612,13 @@ void print_condition(struct conditionNode* condition)
 {
 
     cout<<"WHILE ";
-    print_operand(condition->left_operand);
-    printf("%d", condition->relop);
-    print_operand(condition->right_operand);
-
+    if (condition->left_operand != NULL)
+        print_operand(condition->left_operand);
+    else if (condition -> right_operand != NULL)
+    {
+        printf("%d", condition->relop);
+        print_operand(condition->right_operand);
+    }
 }
 
 
@@ -628,7 +631,6 @@ void print_operand(struct primaryNode* primary)
         printf(" %d ", primary->ival);
     else if(primary->tag == REALNUM)
         printf(" %.4f ", primary->fval);
-
 }
 
 void print_while_stmt(struct while_stmtNode* while_stmt)
@@ -641,10 +643,10 @@ void print_while_stmt(struct while_stmtNode* while_stmt)
 
 void print_stmt(struct stmtNode* stmt)
 {
-    cout << "\nprint stmt\n";
+    //cout << "\nprint stmt\n";
 	if (stmt->stmtType == ASSIGN)
     {
-        cout<<"\n If assign stmt \n";
+        //cout<<"\n If assign stmt \n";
 		print_assign_stmt(stmt->assign_stmt);
     }
     else if (stmt->stmtType == WHILE)
@@ -1098,8 +1100,9 @@ struct conditionNode* condition()
         }
         else
         {
-            syntax_error("while stat operators expected", line_no);
-            exit(0);
+            ungetToken();
+            condNode->right_operand = NULL;
+            return condNode;
         }    
 
         cout << "\ncalling primary for right op\n";
@@ -1121,16 +1124,16 @@ struct while_stmtNode* while_stmt()
     
      whileStmt = make_while_stmtNode();     
   
-     cout << "\nInside while stmt\n";
+     //cout << "\nInside while stmt\n";
  
      ttype = getToken();
      if (ttype == WHILE)
      { 
-        cout << "\nCalling condition\n";
+        //cout << "\nCalling condition\n";
         whileStmt->condition = condition();
 
 
-        cout<< "\ncalling body\n";
+        //cout<< "\ncalling body\n";
         whileStmt->body = body();
         return whileStmt; 
      }
@@ -1184,7 +1187,7 @@ struct stmt_listNode* stmt_list()
 		stmtList = make_stmt_listNode();
 		stmtList->stmt = stmt();
 		ttype = getToken();
-		if (ttype == ID)
+		if (ttype == ID || ttype == WHILE)
 		{	ungetToken();
 			stmtList->stmt_list = stmt_list();
 			return stmtList;
@@ -1216,7 +1219,9 @@ struct bodyNode* body()
 			exit(0); 
 		}
 	} else
-	{	syntax_error("body. LBRACE expected", line_no);
+	{	    
+        cout << "Getting "<<ttype<<"\n";
+        syntax_error("body. LBRACE expected", line_no);
 		exit(0); 
 	}
 }
