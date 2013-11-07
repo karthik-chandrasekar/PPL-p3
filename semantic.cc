@@ -902,6 +902,9 @@ int print_expression_prefix(struct exprNode* expr)
 void update_builtin_id_type(int old_id, int new_id)
 {
 
+    if (old_id == new_id)
+        return;
+
     temp_id_set.clear();
     temp_id_set_1.clear();
 
@@ -911,6 +914,8 @@ void update_builtin_id_type(int old_id, int new_id)
     cout<< "\n New id is"<<new_id<<"\n";
 
 
+    //TYPESEC TYPID TO IDS LIST
+
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
 	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 	{
@@ -919,7 +924,9 @@ void update_builtin_id_type(int old_id, int new_id)
         temp_id_set.insert(*sl_it);
 	}	
     
-    cout<<"Temp id set contains - In type sec for  "<<old_id;
+    
+    //VAR SEC TYPE ID TO IDS LIST
+    cout<<"\nExisting old one - type sec id set \n"<<old_id;
     print_set(temp_id_set);
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
     //print_list(temp_id_list);
@@ -931,20 +938,32 @@ void update_builtin_id_type(int old_id, int new_id)
         temp_id_set_1.insert(*sl_it_2);
 	}
 	
-    //cout << "\nout of second for looop\n";
-
-    cout<<"Temp id set 1 contains - In type sec for  "<<old_id;
+    cout<<"\nExisting old one - var sec id set\n"<<old_id;
     print_set(temp_id_set_1);
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
 
     temp_id_set_1.clear();    
 
+    //cout << "\nout of second for looop\n";
+
+
+    //TYPE ID TO IDS SET - FOR OLD_ID
+
+    temp_id_set_1 = typeid_to_ids_set_map[old_id];    
+    temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
+    temp_id_set_1.clear();    
+
+
+    // DEALING WITH VALUES OF  NEW ID
     temp_id_set_1 = typeid_to_ids_set_map[new_id];
 
+    cout<<"\nExisting new one -  \n";
+    print_set(temp_id_set_1);
 
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
-  
+ 
+    cout<<"\nFinal combined new one \n"; 
     print_set(temp_id_set);
  
     //print_set(temp_id_set);
@@ -955,6 +974,7 @@ void update_builtin_id_type(int old_id, int new_id)
 
     temp_id_set_1.clear();
 
+    cout<<"\n------------------------------\n";
     //cout<< "\nEnd of update built in method\n";
 } 
 
@@ -2482,7 +2502,6 @@ void generate_output_content()
         if(seen_id_set.count(temp_typeid)==0)
         {
             temp_id_set = typeid_to_ids_set_map[temp_typeid];
-            output_map[temp_typename] = temp_id_set;
             seen_id_set.insert(temp_typeid);        
             if (temp_id_set.size()>0)
                 output_map[temp_typename] = temp_id_set;        
@@ -2503,7 +2522,6 @@ void generate_output_content()
         if(seen_id_set.count(temp_typeid)==0)
         {
             temp_id_set = typeid_to_ids_set_map[temp_typeid];
-            output_map[temp_typename] = temp_id_set;
             seen_id_set.insert(temp_typeid);        
             if (temp_id_set.size()>0)
                 output_map[temp_typename] = temp_id_set;        
@@ -2659,12 +2677,12 @@ int main()
 	/****BODY TYPECHECK****/
     print_parse_tree(parseTree);
 	//check_for_error();
-	print_new_maps();
+	//print_new_maps();
     //print_ds();
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    print_order_explicit_or_implicit_info();    
+    //print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
