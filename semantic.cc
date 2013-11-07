@@ -610,28 +610,112 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
 void print_condition(struct conditionNode* condition)
 {
+    leftop_type = 0;
+    rightop_type = 0;
 
     cout<<"WHILE ";
     if (condition->left_operand != NULL)
-        print_operand(condition->left_operand);
+    {
+        leftop_type = print_operand(condition->left_operand);
+        cout<< "\nLeftop type  "<<leftop_type<<"\n";
+
+        if (leftop_type == ID)
+        {
+            new_val = start_val + 1;
+            start_val = new_val;
+            typevalue_to_typeid_map[condition->left_operand->id] = new_val;
+            temp_typename = condition->left_operand->id;
+            leftop_type = new_val;
+
+            // Order maintainance addition
+            var_decl_map[temp_typename] = 0;
+            var_implicit_list.push_back(temp_typename);
+
+            //Content addition
+            
+            // Need to add in three places
+
+            // First place
+            temp_id_set.clear();
+            temp_id_set.insert(temp_typename);
+            typeid_to_ids_set_map[leftop_type] = temp_id_set;
+            
+            // Second place
+            temp_id_list.clear();
+            temp_id_list.push_back(temp_typename);
+            if(varsec_typeid_to_ids_list_map.count(leftop_type)>0)
+            {
+                temp_id_list = varsec_typeid_to_ids_list_map[leftop_type];
+                temp_id_list.push_back(temp_typename);
+            }
+            varsec_typeid_to_ids_list_map[leftop_type] = temp_id_list;
+
+            //Third place
+            varsec_typename_order_list.push_back(temp_typename);
+            
+        
+    cout<<"\nAdded "<<temp_typename<<" from leftop type and the value is "<<new_val<<"\n";
+        }
+    }
      if (condition -> right_operand != NULL)
     {
         printf("%d", condition->relop);
-        print_operand(condition->right_operand);
+        rightop_type = print_operand(condition->right_operand);
+        cout<< "\nRightop type  "<<rightop_type<<"\n";
+
     }
     cout<<"\n";
+
+    if(leftop_type != 0 && rightop_type !=0)
+    {
+        //both the operands present
+        if (leftop_type > UD && rightop_type > UD)
+            {
+                update_builtin_id_type(rightop_type, leftop_type);  
+                update_builtin_id_type(leftop_type, BOOLEAN);      
+            }
+        else if(leftop_type < UD || rightop_type < UD)
+            {
+                cout<<"\nERROR CODE 3";
+                exit(0);
+            }
+    }
+    else if(leftop_type !=0)
+    {
+        //only single operand present
+
+        if(leftop_type > UD)
+        {
+            update_builtin_id_type(leftop_type, BOOLEAN);
+        }
+        else
+        {
+            cout<< "\nERROR CODE 3";
+            exit(0);
+        }
+    }
+
 }
 
 
-void print_operand(struct primaryNode* primary)
+int print_operand(struct primaryNode* primary)
 {
    
     if (primary->tag == ID)
+    {
         printf(" %s ", primary->id);
+        return primary->tag;
+    }   
     else if(primary->tag == NUM)
+    {
         printf(" %d ", primary->ival);
+        return primary->tag;
+    }
     else if(primary->tag == REALNUM)
+    {
         printf(" %.4f ", primary->fval);
+        return primary->tag;
+    }
 }
 
 void print_while_stmt(struct while_stmtNode* while_stmt)
@@ -753,9 +837,9 @@ void update_builtin_id_type(int old_id, int new_id)
     temp_id_set_1.clear();
 
     
-    //cout <<"\n old id is "<<old_id<<"\n";
+    cout <<"\n old id is "<<old_id<<"\n";
 
-    //cout<< "\n New id is"<<new_id<<"\n";
+    cout<< "\n New id is"<<new_id<<"\n";
 
 
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
@@ -768,6 +852,7 @@ void update_builtin_id_type(int old_id, int new_id)
 	}	
 
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
+    //print_list(temp_id_list);
 	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
 	{
         //cout<<"\n old id value is \n"<<old_id<<" "<<*sl_it_2;
@@ -788,6 +873,8 @@ void update_builtin_id_type(int old_id, int new_id)
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
    
+    print_set(temp_id_set);
+
     temp_id_set.clear();
     
     typeid_to_ids_set_map[old_id] = temp_id_set;
@@ -2083,7 +2170,6 @@ void generate_final_output()
         temp_id_set = typeid_to_ids_set_map[temp_typeid];
         
         output_map[temp_typename] = temp_id_set;
-
     }
 
     for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
@@ -2111,6 +2197,10 @@ void generate_final_output()
 
         }
     }
+
+    print_list(varsec_typename_order_list);
+    print_list(typesec_typename_order_list);
+
 }
 
 
@@ -2269,9 +2359,75 @@ list<string> order_id_list(set<string> temp_id_set)
     return temp_id_list;
 }
 
+void generate_output_content()
+{
+
+    output_map.clear();
+
+
+   // FOR BUILT IN TYPES
+    for(sl_it = built_in_types_list.begin(); sl_it != built_in_types_list.end(); sl_it++)
+    {
+        temp_typename = *sl_it;
+        temp_typeid = typevalue_to_typeid_map[temp_typename];
+        temp_id_set = typeid_to_ids_set_map[temp_typeid];
+       
+        if (temp_typeid ==0)
+            continue;
+            
+        if (temp_id_set.size()>0)
+            output_map[temp_typename] = temp_id_set;        
+    }
+
+    
+    //FOR TYPE IMPLICIT
+
+    for(sl_it = type_implicit_list.begin(); sl_it != type_implicit_list.end(); sl_it++)
+    {
+        temp_typename = *sl_it;
+        if(output_map.count(temp_typename) ==0)
+        {
+            temp_typeid = typevalue_to_typeid_map[temp_typename];
+            temp_id_set = typeid_to_ids_set_map[temp_typeid];
+            output_map[temp_typename] = temp_id_set;        
+        } 
+        if (temp_typeid ==0)
+            continue;
+            
+        if (temp_typeid == 13)
+            temp_typename = "BOOLEAN";
+
+        if (temp_id_set.size()>0)
+            output_map[temp_typename] = temp_id_set;        
+    }
+
+    //FOR VAR IMPLICIT
+    for(sl_it = var_implicit_list.begin(); sl_it != var_implicit_list.end(); sl_it++)
+    {
+
+        temp_typename = *sl_it;
+        if(output_map.count(temp_typename)==0)
+        {
+            temp_typeid = typevalue_to_typeid_map[temp_typename];
+            temp_id_set = typeid_to_ids_set_map[temp_typeid];
+            output_map[temp_typename] = temp_id_set;        
+        }
+        if (temp_typeid ==0)
+            continue;
+
+        if (temp_typeid == 13)
+            temp_typename = "BOOLEAN";
+            
+        if (temp_id_set.size()>0)
+            output_map[temp_typename] = temp_id_set;        
+    }
+}
+
+
 void format_output()
 {
     generate_final_output();
+    generate_output_content();
     //print_output_map();
     order_output();
     print_final_output();
@@ -2413,7 +2569,7 @@ int main()
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    //print_order_explicit_or_implicit_info();    
+    print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
