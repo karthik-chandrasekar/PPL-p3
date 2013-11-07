@@ -130,7 +130,7 @@ set<string> published_op_set;
 map<string, int>  typevalue_to_typeid_map;
 map<string, list<string> >  typesec_typename_to_idlist_map;
 map<string, list<string> > varsec_typename_to_idlist_map;
-
+map<string, int> var_implicit_pos_map;
 
 map<int, list<string> > typesec_typeid_to_ids_list_map;
 map<int, list<string> > varsec_typeid_to_ids_list_map;
@@ -571,6 +571,11 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
         {
             var_decl_map[assign_stmt->id] = 0;
             var_implicit_list.push_back(assign_stmt->id);
+            var_implicit_pos_map[assign_stmt->id] = var_implicit_list.size();
+        
+            var_implicit_list.push_back(selected_id);
+            var_implicit_pos_map[selected_id] = var_implicit_list.size();
+            
         }
       }
     
@@ -584,20 +589,26 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
     
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
-        if (leftop_type > up_limit)
-        {
-		    update_builtin_id_type(rightop_type, leftop_type);	
-
-        }
-        else if (rightop_type > up_limit)
-        {
-            update_builtin_id_type(leftop_type, rightop_type);
-        }
-        else
-        {
-		    update_builtin_id_type(rightop_type, leftop_type);	
-
-        }
+            if (var_implicit_pos_map.count(selected_id)>0 && var_implicit_pos_map.count(selected_id)>0)
+            {
+                if(var_implicit_pos_map[selected_id] > var_implicit_pos_map[assign_stmt->id])
+                {
+                    cout << "\nINSIDEEEE IF-- ----- IF --- FLOWWWW\n";
+		            update_builtin_id_type(rightop_type, leftop_type);	
+                    
+                }
+                else 
+                {
+                    cout << "\nINSIDEEEE IF ---------- ELSE ----- FLOWWWW\n";
+		            update_builtin_id_type(leftop_type, rightop_type);	
+                
+                }
+            }
+            else
+            {
+                cout<< "\nINSIDEEEE ELSE FLOOWWWW\n";
+		        update_builtin_id_type(rightop_type, leftop_type);	
+            }
 	}		
 			
 	else if (leftop_type > UD)
@@ -804,20 +815,7 @@ int print_expression_prefix(struct exprNode* expr)
 
 		if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 		{
-            if (leftop_type > up_limit)
-            {
                 update_builtin_id_type(rightop_type, leftop_type);	
-
-            }
-            else if (rightop_type > up_limit)
-            {
-                update_builtin_id_type(leftop_type, rightop_type);
-            }
-            else
-            {
-                update_builtin_id_type(rightop_type, leftop_type);	
-
-            }
 		}
 
 		else if (leftop_type > UD)
@@ -864,7 +862,6 @@ int print_expression_prefix(struct exprNode* expr)
                 if(var_decl_map.count(selected_id)==0)
                 {
                     var_decl_map[selected_id] = 0;
-                    var_implicit_list.push_back(selected_id);
                 }
  
                    
@@ -2422,6 +2419,15 @@ list<string> order_id_list(set<string> temp_id_set)
     return temp_id_list;
 }
 
+void fill_typevalues_for_built_in()
+{
+
+typevalue_to_typeid_map["INT"]= INT;
+typevalue_to_typeid_map["REAL"]= REAL;
+typevalue_to_typeid_map["STRING"]= STRING;
+typevalue_to_typeid_map["BOOLEAN"]= BOOLEAN;
+}
+
 void generate_output_content()
 {
 
@@ -2457,9 +2463,6 @@ void generate_output_content()
         if (temp_typeid ==0)
             continue;
             
-        if (temp_typeid == 13)
-            temp_typename = "BOOLEAN";
-
         if (temp_id_set.size()>0)
             output_map[temp_typename] = temp_id_set;        
     }
@@ -2478,9 +2481,6 @@ void generate_output_content()
         if (temp_typeid ==0)
             continue;
 
-        if (temp_typeid == 13)
-            temp_typename = "BOOLEAN";
-            
         if (temp_id_set.size()>0)
             output_map[temp_typename] = temp_id_set;        
     }
