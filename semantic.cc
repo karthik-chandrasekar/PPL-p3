@@ -83,6 +83,7 @@ int leftop_type;
 int rightop_type;
 int selected_type;
 int UD = 13;
+int up_limit = 33;
 
 //List
 list<string> typename_order_list;
@@ -578,11 +579,25 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
         leftop_type = typevalue_to_typeid_map[assign_stmt->id];
       }
 	
-    //cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
-
+    cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
+    cout<<"\n Right info "<<rightop_type<<"\n\n";
+    
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
-		update_builtin_id_type(rightop_type, leftop_type);	
+        if (leftop_type > up_limit)
+        {
+		    update_builtin_id_type(rightop_type, leftop_type);	
+
+        }
+        else if (rightop_type > up_limit)
+        {
+            update_builtin_id_type(leftop_type, rightop_type);
+        }
+        else
+        {
+		    update_builtin_id_type(rightop_type, leftop_type);	
+
+        }
 	}		
 			
 	else if (leftop_type > UD)
@@ -668,7 +683,8 @@ void print_condition(struct conditionNode* condition)
             new_val = start_val + 1;
             start_val = new_val;
             temp_typename = condition->right_operand->id;
-            typevalue_to_typeid_map[temp_typename] = new_val;            rightop_type = new_val; 
+            typevalue_to_typeid_map[temp_typename] = new_val;
+            rightop_type = new_val; 
 
             //Order maintenance addition
             var_decl_map[temp_typename] = 0;
@@ -704,10 +720,11 @@ void print_condition(struct conditionNode* condition)
         //both the operands present
         if (leftop_type > UD && rightop_type > UD)
             {
+                cout<<"\nENTERING IN TO FIRST FLOWWWW\n";
                 update_builtin_id_type(rightop_type, leftop_type);  
                 update_builtin_id_type(leftop_type, BOOLEAN);      
             }
-        else if(leftop_type < UD || rightop_type < UD)
+        else if((leftop_type < UD || rightop_type < UD) && (leftop_type != rightop_type))
             {
                 cout<<"\nERROR CODE 3";
                 exit(0);
@@ -787,8 +804,20 @@ int print_expression_prefix(struct exprNode* expr)
 
 		if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 		{
-			update_builtin_id_type(rightop_type, leftop_type);
-			selected_type = leftop_type;
+            if (leftop_type > up_limit)
+            {
+                update_builtin_id_type(rightop_type, leftop_type);	
+
+            }
+            else if (rightop_type > up_limit)
+            {
+                update_builtin_id_type(leftop_type, rightop_type);
+            }
+            else
+            {
+                update_builtin_id_type(rightop_type, leftop_type);	
+
+            }
 		}
 
 		else if (leftop_type > UD)
@@ -851,13 +880,13 @@ int print_expression_prefix(struct exprNode* expr)
 		{
 			printf("%d ", expr->primary->ival);
 			selected_id = expr->primary->ival;
-			return NUM;
+			return INT;
 		}
 		else if (expr->primary->tag == REALNUM)
 		{
 			printf("%.4f ", expr->primary->fval);
 			selected_id = expr->primary->fval;
-			return REALNUM;
+			return REAL;
 		}
 	}
 	return selected_type;
@@ -878,7 +907,6 @@ void update_builtin_id_type(int old_id, int new_id)
 	temp_id_list = typesec_typeid_to_ids_list_map[old_id];
 	for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 	{
-
         //cout << "\nfirst for looop\n";
 		typevalue_to_typeid_map[*sl_it] = new_id;
         temp_id_set.insert(*sl_it);
@@ -905,8 +933,10 @@ void update_builtin_id_type(int old_id, int new_id)
 
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
-   
+  
     print_set(temp_id_set);
+ 
+    //print_set(temp_id_set);
 
     temp_id_set.clear();
     
@@ -2231,8 +2261,8 @@ void generate_final_output()
         }
     }
 
-    print_list(varsec_typename_order_list);
-    print_list(typesec_typename_order_list);
+    //print_list(varsec_typename_order_list);
+    //print_list(typesec_typename_order_list);
 
 }
 
@@ -2269,12 +2299,12 @@ void print_final_output()
 
 void print_set(set<string> temp_id_set)
 {
-    cout<<"\nPrinting temp id set\n";
+    cout<<"\n\nPrinting temp id set\n";
     for(ss_it = temp_id_set.begin(); ss_it != temp_id_set.end(); ss_it++)
     {
         cout<<" "<<*ss_it<<" ";
     }
-    cout<<"\n";
+    cout<<"\n\n";
 
 }
 
@@ -2602,7 +2632,7 @@ int main()
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    print_order_explicit_or_implicit_info();    
+    //print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
