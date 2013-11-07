@@ -213,7 +213,7 @@ char *reserved[] =
 int printToken(int ttype)
 {
    if (ttype <= RESERVED)
-   {   printf("%s\n",reserved[ttype]);
+   {   //printf("%s\n",reserved[ttype]);
        return 1;
    } else
        return 0; 
@@ -423,7 +423,7 @@ SYNTAX ANALYSIS SECTION
 /*-------------------------------UTILITIE---------------------------*/
 void syntax_error(char* NT, int line_no)
 {
-	printf("Syntax error while parsing %s line %d\n", NT, line_no);
+	//printf("Syntax error while parsing %s line %d\n", NT, line_no);
 }
 
 /*--------------------------------------------------------------------
@@ -627,7 +627,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	else if (leftop_type != rightop_type)
 	{
 		error_code_list.push_back(3);
-        cout<< "ERROR CODE 3 \n";
+        cout<< "ERROR CODE 3\n";
 		exit(0);
 	}
 
@@ -737,7 +737,7 @@ void print_condition(struct conditionNode* condition)
             }
         else if((leftop_type <= UD || rightop_type <= UD) && (leftop_type != rightop_type))
             {
-                cout<<"\nERROR CODE 3";
+                cout<<"ERROR CODE 3\n";
                 exit(0);
             }
     }
@@ -751,7 +751,7 @@ void print_condition(struct conditionNode* condition)
         }
         else
         {
-            cout<< "\nERROR CODE 3";
+            cout<< "ERROR CODE 3\n";
             exit(0);
         }
     }
@@ -1402,7 +1402,7 @@ struct bodyNode* body()
 		}
 	} else
 	{	    
-        cout << "Getting "<<ttype<<"\n";
+        //cout << "Getting "<<ttype<<"\n";
         syntax_error("body. LBRACE expected", line_no);
 		exit(0); 
 	}
@@ -1806,30 +1806,30 @@ void print_order_ds()
     //cout<<"UO TYPESEC MAP \n";
     for(usl_it = uo_typesec_map.begin(); usl_it != uo_typesec_map.end(); usl_it++)
     {
-        cout<<((*usl_it).first)<<" :";
+        //cout<<((*usl_it).first)<<" :";
 
         for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
         {
-            cout<<(*sl_it)<<" ,";
+            //cout<<(*sl_it)<<" ,";
         }
-        cout<<"\n";
+        //cout<<"\n";
     
     }
-    cout<<"\n\n";
+    //cout<<"\n\n";
 
     //cout<<"UO VARSEC MAP \n";
     for(usl_it = uo_varsec_map.begin(); usl_it != uo_varsec_map.end(); usl_it++)
     {
-        cout<<((*usl_it).first)<<" :";
+        //cout<<((*usl_it).first)<<" :";
 
         for(sl_it = (*usl_it).second.begin(); sl_it != (*usl_it).second.end(); sl_it++)
         {
-            cout<<(*sl_it)<<" ,";
+            //cout<<(*sl_it)<<" ,";
         }
-        cout<<"\n";
+        //cout<<"\n";
     
     }
-    cout<<"\n\n";
+    //cout<<"\n\n";
 }
 
 void print_ds()
@@ -1837,44 +1837,44 @@ void print_ds()
 	// Print typsec_typelist and typesec_idlist 
 
 	//cout<< "After first for loop in print ds"<<"\n";
-    cout << "\nType sec typename to idlist map\n";
+    //cout << "\nType sec typename to idlist map\n";
 	for(slm_it = typesec_typename_to_idlist_map.begin(); slm_it!=typesec_typename_to_idlist_map.end(); slm_it++)
 	{
-		cout<<((*slm_it).first)<<" :";
+		//cout<<((*slm_it).first)<<" :";
 			
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
-			cout<<(*sl_it)<<" ,";			
+			//cout<<(*sl_it)<<" ,";			
 		}
-		cout<<"\n";	
+		//cout<<"\n";	
 	}
-	cout<<"\n\n";
+	//cout<<"\n\n";
 
 	// Print varsec_typelist and varsec_idlist
 	//cout<< "After second for loop in print ds"<<"\n";
-    cout << "\nVar sec typename to idlist map\n";
+    //cout << "\nVar sec typename to idlist map\n";
 	for(slm_it = varsec_typename_to_idlist_map.begin(); slm_it!=varsec_typename_to_idlist_map.end(); slm_it++)
 	{
-		cout<<((*slm_it).first)<<" :";
+		//cout<<((*slm_it).first)<<" :";
 		
 		for(sl_it = (*slm_it).second.begin(); sl_it != (*slm_it).second.end(); sl_it++)
 		{
-			cout<<(*sl_it)<<" ,";
+			//cout<<(*sl_it)<<" ,";
 		}
-		cout<<"\n";
+		//cout<<"\n";
 	}
-	cout<<"\n\n";
+	//cout<<"\n\n";
 
 
 	//Print typevalue_to_typeid_map
 	//cout<< "After third for loop in print ds"<<"\n";
 	
-    cout<< "\n Typevalue to typeid map\n";
+    //cout<< "\n Typevalue to typeid map\n";
 	for(nid_it = typevalue_to_typeid_map.begin(); nid_it != typevalue_to_typeid_map.end(); nid_it++)
 	{
-		cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
+		//cout<<(*nid_it).first<<"   "<<(*nid_it).second<<" "<<"\n";
 	}	
-	cout<<"\n\n";
+	//cout<<"\n\n";
 }
 
 
@@ -2117,52 +2117,52 @@ void get_varsec_typeid_to_ids_list_map()
 void print_new_maps()
 {
 
-    cout << "\ntypesec_typeid_to_ids_list_map\n";
+    //cout << "\ntypesec_typeid_to_ids_list_map\n";
 
 	for(ilm_it = typesec_typeid_to_ids_list_map.begin(); ilm_it != typesec_typeid_to_ids_list_map.end(); ilm_it++)
 	{
-		cout<< (*ilm_it).first<<":";
+		//cout<< (*ilm_it).first<<":";
 		
 		temp_id_list = (*ilm_it).second;
 		for (sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 		{
-			cout<< (*sl_it)<<",";
+			//cout<< (*sl_it)<<",";
 		}
-		cout<<"\n";
+		//cout<<"\n";
 	}
 
-    cout << "\n";
+    //cout << "\n";
 
 
-    cout<<"varsec_typeid_to_ids_list_map\n";
+    //cout<<"varsec_typeid_to_ids_list_map\n";
 	for(ilm_it = varsec_typeid_to_ids_list_map.begin(); ilm_it != varsec_typeid_to_ids_list_map.end(); ilm_it++)
 	{
-		cout<< (*ilm_it).first<<":";
+		//cout<< (*ilm_it).first<<":";
 		
 		temp_id_list = (*ilm_it).second;
 		for (sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
 		{
-			cout<< (*sl_it)<<",";
+			//cout<< (*sl_it)<<",";
 		}
-		cout<<"\n";
+		//cout<<"\n";
 	}
 
-	cout<<"\n";
+	//cout<<"\n";
 
-    cout<<"typeid_to_ids_set_map\n";
+    //cout<<"typeid_to_ids_set_map\n";
 	for(ism_it = typeid_to_ids_set_map.begin(); ism_it != typeid_to_ids_set_map.end(); ism_it++)
 	{
-		cout<< (*ism_it).first<<":";
+		//cout<< (*ism_it).first<<":";
 		
 		old_id_set = (*ism_it).second;
 		for (ss_it = old_id_set.begin(); ss_it != old_id_set.end(); ss_it++)
 		{
-			cout<< (*ss_it)<<",";
+			//cout<< (*ss_it)<<",";
 		}
-		cout<<"\n";
+		//cout<<"\n";
 	}
 
-    cout <<"\n";
+    //cout <<"\n";
 }
 
 void get_new_maps()
@@ -2236,7 +2236,7 @@ void print_error()
 {
 	for(il_it=error_code_list.begin(); il_it!=error_code_list.end(); il_it++)
 	{
-		cout<<"ERROR CODE "<<*il_it<<"\n";
+		//cout<<"ERROR CODE "<<*il_it<<"\n";
         exit(0);
 	}
 }
@@ -2309,7 +2309,7 @@ void print_final_output()
             continue;
         }
 
-        cout <<"\n"<< (*vec_it).first<<" : ";
+        cout<< (*vec_it).first<<" : ";
 
         published_op_set.insert((*vec_it).first);
 
@@ -2323,31 +2323,31 @@ void print_final_output()
                 published_op_set.insert(*sl_it);
             }
         }
-        cout<< "#";
+        cout<< "#\n";
     }
     cout<< "\n";
 }
 
 void print_set(set<string> temp_id_set)
 {
-    cout<<"\n\nPrinting temp id set\n";
+    //cout<<"\n\nPrinting temp id set\n";
     for(ss_it = temp_id_set.begin(); ss_it != temp_id_set.end(); ss_it++)
     {
         cout<<" "<<*ss_it<<" ";
     }
-    cout<<"\n\n";
+    //cout<<"\n\n";
 
 }
 
 void print_list(list<string> temp_id_list)
 {
 
-    cout<<"\n Printing temp id list\n";
+    //cout<<"\n Printing temp id list\n";
     for(sl_it = temp_id_list.begin(); sl_it != temp_id_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 
 }
 
@@ -2481,7 +2481,7 @@ void generate_output_content()
     
         if (temp_typeid ==0)
         {
-            cout<<"\nvalue is 0 for"<<temp_typename<<"\n";
+            //cout<<"\nvalue is 0 for"<<temp_typename<<"\n";
             continue;
          } 
            
@@ -2565,94 +2565,91 @@ void print_order_explicit_or_implicit_info()
 {
     //PRINT type_decl_map
 
-    cout<<"\n TYPE DECL MAP";
+    //cout<<"\n TYPE DECL MAP";
     for(nid_it = type_decl_map.begin(); nid_it != type_decl_map.end(); nid_it++)
      {
         temp_typename = (*nid_it).first; 
-        cout<<"\n"<<temp_typename<<" : "<< (*nid_it).second;
+        //cout<<"\n"<<temp_typename<<" : "<< (*nid_it).second;
 
      } 
 
     //PRINT var_decl_map
 
-    cout<<"\n VAR DECL MAP";
+    //cout<<"\n VAR DECL MAP";
     for(nid_it = var_decl_map.begin(); nid_it != var_decl_map.end(); nid_it++)
     {
-        cout<<"\n"<<(*nid_it).first<<" : "<<(*nid_it).second;
+        //cout<<"\n"<<(*nid_it).first<<" : "<<(*nid_it).second;
     }
 
 
     //PRINT type_explicit_list
 
-    cout<<"\n TYPE EXPLICIT LIST";
+    //cout<<"\n TYPE EXPLICIT LIST";
     for(sl_it = type_explicit_list.begin(); sl_it != type_explicit_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 
     //PRINT type_implicit_list
-    cout<<" TYPE IMPLICIT LIST";
+    //cout<<" TYPE IMPLICIT LIST";
     for(sl_it = type_implicit_list.begin(); sl_it != type_implicit_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 
     //PRINT var_explicit_list
-    cout<<"VAR EXPLICIT LIST";
+    //cout<<"VAR EXPLICIT LIST";
     for(sl_it = var_explicit_list.begin(); sl_it != var_explicit_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 
     //PRINT var_implicit_list
-    cout<<"VAR IMPLICIT LIST";
+    //cout<<"VAR IMPLICIT LIST";
     for(sl_it = var_implicit_list.begin(); sl_it != var_implicit_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 }
 
 void print_order_list()
 {
-    cout<<"PRINTING TYPESEC TYPENAME ORDER LIST";
+    //cout<<"PRINTING TYPESEC TYPENAME ORDER LIST";
     for(sl_it = typesec_typename_order_list.begin(); sl_it != typesec_typename_order_list.end(); sl_it++)
     {
-        cout<< "  "<<*sl_it<<" ";
+        //cout<< "  "<<*sl_it<<" ";
     }
-    cout<< "\n";
+    //cout<< "\n";
 
-    cout<<"PRINTING VARSEC TYPENAME ORDER LIST";
+    //cout<<"PRINTING VARSEC TYPENAME ORDER LIST";
     for(sl_it = varsec_typename_order_list.begin(); sl_it != varsec_typename_order_list.end(); sl_it++)
     {
-        cout<<" "<<*sl_it<<" ";
+        //cout<<" "<<*sl_it<<" ";
     }
-    cout<<"\n";
+    //cout<<"\n";
 
 }
 
 void print_output_map()
 {
 
-    cout<<"\nOutput map \n";
+    //cout<<"\nOutput map \n";
     for(ssm_it = output_map.begin(); ssm_it != output_map.end(); ssm_it++)
     {
-        cout<<"\n"<< (*ssm_it).first<<" : ";
+        //cout<<"\n"<< (*ssm_it).first<<" : ";
         for(ss_it = (*ssm_it).second.begin(); ss_it != (*ssm_it).second.end(); ss_it++)
             {
-                cout<<" "<<*ss_it<<" ";
+                //cout<<" "<<*ss_it<<" ";
             }
     }
-    cout<<"\n\n";
+    //cout<<"\n\n";
 
 }
 
-// COMMON mistakes:
-//    *     = instead of ==
-//    *     not allocating space before strcpy
 int main()
 {
 	struct programNode* parseTree;
