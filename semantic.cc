@@ -627,7 +627,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	else if (leftop_type != rightop_type)
 	{
 		error_code_list.push_back(3);
-        cout<< "ERROR CODE 3\n";
+        cout<< "ERROR CODE 3\n\n";
 		exit(0);
 	}
 
@@ -737,7 +737,7 @@ void print_condition(struct conditionNode* condition)
             }
         else if((leftop_type <= UD || rightop_type <= UD) && (leftop_type != rightop_type))
             {
-                cout<<"ERROR CODE 3\n";
+                cout<<"ERROR CODE 3\n\n";
                 exit(0);
             }
     }
@@ -751,7 +751,7 @@ void print_condition(struct conditionNode* condition)
         }
         else
         {
-            cout<< "ERROR CODE 3\n";
+            cout<< "ERROR CODE 3\n\n";
             exit(0);
         }
     }
@@ -1896,7 +1896,7 @@ void check_for_error_typesec()
 			if (seen_typesec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(0);
-                cout<< "ERROR CODE 0\n";
+                cout<< "ERROR CODE 0\n\n";
 				exit(0);
 			}
 			seen_typesec_ids_set.insert(*sl_it_2);
@@ -1908,7 +1908,7 @@ void check_for_error_typesec()
 
 		{
 			error_code_list.push_back(1);
-            cout<< "ERROR CODE 0\n";
+            cout<< "ERROR CODE 0\n\n";
 			exit(0);
 
 		}
@@ -1938,7 +1938,7 @@ void check_for_error_varsec()
 
 		{
 			error_code_list.push_back(1);
-            cout<<"ERROR CODE 1\n";
+            cout<<"ERROR CODE 1\n\n";
             exit(0);
 
 		}
@@ -1950,13 +1950,13 @@ void check_for_error_varsec()
 			if (seen_varsec_ids_set.count(*sl_it_2)!=0)
 			{
 				error_code_list.push_back(2);
-                cout<<"ERROR CODE 2\n";
+                cout<<"ERROR CODE 2\n\n";
                 exit(0);
 			}
 			if (seen_typesec_typename_set.count(*sl_it_2)>0 || seen_typesec_ids_set.count(*sl_it_2)>0)
 			{
 				error_code_list.push_back(1);
-                cout<<"ERROR CODE 1\n";
+                cout<<"ERROR CODE 1\n\n";
                 exit(0);
 			}
 			seen_varsec_ids_set.insert(*sl_it_2);
