@@ -122,7 +122,7 @@ struct assign_stmtNode* 		make_assign_stmtNode();
 struct type_nameNode* 			make_type_nameNode();
 struct exprNode* 				make_exprNode();
 struct primaryNode* 			make_primaryNode();
-
+struct conditionNode*           make_conditionNode();
 
 void print_decl(struct declNode* dec);
 void print_body(struct bodyNode* body);
@@ -146,6 +146,8 @@ void print_order_ds();
 void print_order_list();
 void order_output();
 void print_output_map();
+void print_condition(struct conditionNode* condition);
+void print_operand(struct primaryNode* primary);
 
 //Newly added
 
