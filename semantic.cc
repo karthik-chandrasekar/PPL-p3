@@ -735,7 +735,7 @@ void print_condition(struct conditionNode* condition)
                 update_builtin_id_type(rightop_type, leftop_type);  
                 update_builtin_id_type(leftop_type, BOOLEAN);      
             }
-        else if((leftop_type < UD || rightop_type < UD) && (leftop_type != rightop_type))
+        else if((leftop_type <= UD || rightop_type <= UD) && (leftop_type != rightop_type))
             {
                 cout<<"\nERROR CODE 3";
                 exit(0);
@@ -745,7 +745,7 @@ void print_condition(struct conditionNode* condition)
     {
         //only single operand present
 
-        if(leftop_type > UD)
+        if(leftop_type >= UD)
         {
             update_builtin_id_type(leftop_type, BOOLEAN);
         }
@@ -765,7 +765,15 @@ int print_operand(struct primaryNode* primary)
     if (primary->tag == ID)
     {
         printf(" %s ", primary->id);
-        return primary->tag;
+        if(typevalue_to_typeid_map.count(primary->id)>0)
+        {
+            return typevalue_to_typeid_map[primary->id];
+        }
+
+        else
+        {
+            return primary->tag;
+        }
     }   
     else if(primary->tag == NUM)
     {
@@ -908,7 +916,9 @@ void update_builtin_id_type(int old_id, int new_id)
 		typevalue_to_typeid_map[*sl_it] = new_id;
         temp_id_set.insert(*sl_it);
 	}	
-
+    
+    cout<<"Temp id set contains - In type sec for  "<<old_id;
+    print_set(temp_id_set);
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
     //print_list(temp_id_list);
 	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
@@ -921,6 +931,8 @@ void update_builtin_id_type(int old_id, int new_id)
 	
     //cout << "\nout of second for looop\n";
 
+    cout<<"Temp id set 1 contains - In type sec for  "<<old_id;
+    print_set(temp_id_set_1);
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
 
     temp_id_set_1.clear();    
@@ -2622,10 +2634,10 @@ int main()
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	//print_new_maps();
+	print_new_maps();
 
 	/****BODY TYPECHECK****/
-	print_parse_tree(parseTree);
+    print_parse_tree(parseTree);
 	//check_for_error();
 	//print_new_maps();
     //print_ds();
