@@ -125,6 +125,7 @@ set<string>  temp_id_set;
 set<string> temp_id_set_1;
 set<string> built_in_types_set;
 set<string> published_op_set;
+set<int> seen_id_set;
 
 //Map
 map<string, int>  typevalue_to_typeid_map;
@@ -539,7 +540,6 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 
     //cout << "\nprint assign stmt\n";
 
-	rightop_type = print_expression_prefix(assign_stmt->expr);
     
     //cout << "Rightop info "<<selected_id<< " is "<< rightop_type<<"\n";
 
@@ -573,8 +573,6 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
             var_implicit_list.push_back(assign_stmt->id);
             var_implicit_pos_map[assign_stmt->id] = var_implicit_list.size();
         
-            var_implicit_list.push_back(selected_id);
-            var_implicit_pos_map[selected_id] = var_implicit_list.size();
             
         }
       }
@@ -584,6 +582,8 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
         leftop_type = typevalue_to_typeid_map[assign_stmt->id];
       }
 	
+	rightop_type = print_expression_prefix(assign_stmt->expr);
+    
     cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
     cout<<"\n Right info "<<rightop_type<<"\n\n";
     
@@ -680,7 +680,7 @@ void print_condition(struct conditionNode* condition)
             varsec_typename_order_list.push_back(temp_typename);
             
         
-    cout<<"\nAdded "<<temp_typename<<" from leftop type and the value is "<<new_val<<"\n";
+            cout<<"\nAdded "<<temp_typename<<" from leftop type and the value is "<<new_val<<"\n";
         }
     }
      if (condition -> right_operand != NULL)
@@ -870,6 +870,8 @@ int print_expression_prefix(struct exprNode* expr)
                 if(var_decl_map.count(selected_id)==0)
                 {
                     var_decl_map[selected_id] = 0;
+                    var_implicit_list.push_back(selected_id);
+                    var_implicit_pos_map[selected_id] = var_implicit_list.size();
                 }
  
                    
@@ -2444,64 +2446,82 @@ void generate_output_content()
 {
 
     output_map.clear();
+    seen_id_set.clear();
 
 
+    fill_typevalues_for_built_in();
    // FOR BUILT IN TYPES
     for(sl_it = built_in_types_list.begin(); sl_it != built_in_types_list.end(); sl_it++)
     {
         temp_typename = *sl_it;
         temp_typeid = typevalue_to_typeid_map[temp_typename];
         temp_id_set = typeid_to_ids_set_map[temp_typeid];
-       
+        
+        seen_id_set.insert(temp_typeid);   
+    
         if (temp_typeid ==0)
+        {
+            cout<<"\nvalue is 0 for"<<temp_typename<<"\n";
             continue;
-            
+         } 
+           
         if (temp_id_set.size()>0)
             output_map[temp_typename] = temp_id_set;        
     }
 
-    
+   
+    print_output_map();
+ 
     //FOR TYPE IMPLICIT
 
     for(sl_it = type_implicit_list.begin(); sl_it != type_implicit_list.end(); sl_it++)
     {
         temp_typename = *sl_it;
-        if(output_map.count(temp_typename) ==0)
+        temp_typeid = typevalue_to_typeid_map[temp_typename];
+
+        if(seen_id_set.count(temp_typeid)==0)
         {
-            temp_typeid = typevalue_to_typeid_map[temp_typename];
             temp_id_set = typeid_to_ids_set_map[temp_typeid];
-            output_map[temp_typename] = temp_id_set;        
+            output_map[temp_typename] = temp_id_set;
+            seen_id_set.insert(temp_typeid);        
+            if (temp_id_set.size()>0)
+                output_map[temp_typename] = temp_id_set;        
         } 
         if (temp_typeid ==0)
             continue;
             
-        if (temp_id_set.size()>0)
-            output_map[temp_typename] = temp_id_set;        
     }
+
+    print_output_map();
 
     //FOR VAR IMPLICIT
     for(sl_it = var_implicit_list.begin(); sl_it != var_implicit_list.end(); sl_it++)
     {
 
         temp_typename = *sl_it;
-        if(output_map.count(temp_typename)==0)
+        temp_typeid = typevalue_to_typeid_map[temp_typename];
+        if(seen_id_set.count(temp_typeid)==0)
         {
-            temp_typeid = typevalue_to_typeid_map[temp_typename];
             temp_id_set = typeid_to_ids_set_map[temp_typeid];
-            output_map[temp_typename] = temp_id_set;        
+            output_map[temp_typename] = temp_id_set;
+            seen_id_set.insert(temp_typeid);        
+            if (temp_id_set.size()>0)
+                output_map[temp_typename] = temp_id_set;        
         }
         if (temp_typeid ==0)
             continue;
 
-        if (temp_id_set.size()>0)
-            output_map[temp_typename] = temp_id_set;        
     }
+    
+    print_output_map();
+
 }
 
 
 void format_output()
 {
-    generate_final_output();
+    //generate_final_output();
+	//print_new_maps();
     generate_output_content();
     //print_output_map();
     order_output();
@@ -2634,17 +2654,17 @@ int main()
 
 	/***POPULATING DATA STRUCTURES***/
 	get_new_maps();
-	print_new_maps();
+	//print_new_maps();
 
 	/****BODY TYPECHECK****/
     print_parse_tree(parseTree);
 	//check_for_error();
-	//print_new_maps();
+	print_new_maps();
     //print_ds();
     //print_order_list();
     //print_order_ds();
     play_with_order_ds();
-    //print_order_explicit_or_implicit_info();    
+    print_order_explicit_or_implicit_info();    
 
     /*****OUTPUT FORMATTING*****/
     format_output();
