@@ -451,6 +451,7 @@ void print_decl(struct declNode* dec)
 
 void print_body(struct bodyNode* body)
 {
+    cout<<"Inside print body";
 	//printf("{\n");
 	print_stmt_list(body->stmt_list); 
 	//printf("}\n");
@@ -521,6 +522,8 @@ void print_id_list(struct id_listNode* idList)
 
 void print_stmt_list(struct stmt_listNode* stmt_list)
 {
+
+    cout<<"\nprint stmt list\n";
 	print_stmt(stmt_list->stmt);	
 	if (stmt_list->stmt_list != NULL)
 		print_stmt_list(stmt_list->stmt_list);
@@ -530,8 +533,10 @@ void print_stmt_list(struct stmt_listNode* stmt_list)
 void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 {
 
-	//printf("%s ", assign_stmt->id);
-	//printf("= ");
+	printf("%s ", assign_stmt->id);
+	printf("= ");
+
+    //cout << "\nprint assign stmt\n";
 
 	rightop_type = print_expression_prefix(assign_stmt->expr);
     
@@ -600,22 +605,50 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 		exit(0);
 	}
 
-	//printf("; \n");
+	printf("; \n");
+}
+
+void print_condition(struct conditionNode* condition)
+{
+
+    cout<<"WHILE ";
+    print_operand(condition->left_operand);
+    printf("%d", condition->relop);
+    print_operand(condition->right_operand);
+
+}
+
+
+void print_operand(struct primaryNode* primary)
+{
+   
+    if (primary->tag == ID)
+        printf(" %s ", primary->id);
+    else if(primary->tag == NUM)
+        printf(" %d ", primary->ival);
+    else if(primary->tag == REALNUM)
+        printf(" %.4f ", primary->fval);
+
 }
 
 void print_while_stmt(struct while_stmtNode* while_stmt)
 {
 
-//******************************************
-//ADD THE LOGIC OF HANDLING WHILE PART
-//******************************************
+   print_condition(while_stmt->condition);
+   print_body(while_stmt->body); 
 
 }
 
 void print_stmt(struct stmtNode* stmt)
 {
+    cout << "\nprint stmt\n";
 	if (stmt->stmtType == ASSIGN)
+    {
+        cout<<"\n If assign stmt \n";
 		print_assign_stmt(stmt->assign_stmt);
+    }
+    else if (stmt->stmtType == WHILE)
+        print_while_stmt(stmt->while_stmt);
 }
 
 int print_expression_prefix(struct exprNode* expr)
@@ -627,7 +660,7 @@ int print_expression_prefix(struct exprNode* expr)
 		leftop_type = print_expression_prefix(expr->leftOperand);
         //cout << "\nLeftop type is "<<leftop_type<<"\n";
 
-		//printf("%s ", reserved[expr->oper]);
+		printf("%s ", reserved[expr->oper]);
 
 		rightop_type = print_expression_prefix(expr->rightOperand);
 		//cout << "\nRightop type is "<<rightop_type<<"\n";
@@ -645,7 +678,7 @@ int print_expression_prefix(struct exprNode* expr)
 		}
 		else if (rightop_type > UD) 
 		{
-            //cout << "Expected else if right op is greater than UD\n";
+            cout << "Expected else if right op is greater than UD\n";
             update_builtin_id_type(rightop_type, leftop_type);
             selected_type = leftop_type;
    		}
@@ -665,7 +698,7 @@ int print_expression_prefix(struct exprNode* expr)
 	{
 		if (expr->primary->tag == ID)
 		{
-			//printf("%s ", expr->primary->id);
+			printf("%s ", expr->primary->id);
 			selected_id = expr->primary->id;
 			if(typevalue_to_typeid_map.count(selected_id) == 0)
             {
@@ -696,13 +729,13 @@ int print_expression_prefix(struct exprNode* expr)
 		}
 		else if (expr->primary->tag == NUM)
 		{
-			//printf("%d ", expr->primary->ival);
+			printf("%d ", expr->primary->ival);
 			selected_id = expr->primary->ival;
 			return NUM;
 		}
 		else if (expr->primary->tag == REALNUM)
 		{
-			//printf("%.4f ", expr->primary->fval);
+			printf("%.4f ", expr->primary->fval);
 			selected_id = expr->primary->fval;
 			return REALNUM;
 		}
@@ -850,21 +883,16 @@ struct primaryNode* make_primaryNode()
 	return (struct primaryNode*) malloc(sizeof(struct primaryNode));
 }
 
+struct conditionNode* make_conditionNode()
+{
+    return (struct conditionNode*) malloc(sizeof(struct conditionNode));
+}
+
 /*--------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
   PARSING AND BUILDING PARSE TREE
 ---------------------------------------------------------------------*/
-struct primaryNode* primary()
-{
-	struct primaryNode* primar;
-}
-
-struct conditionNode* condition()
-{
-	return NULL;
-}
-
 struct exprNode* factor()
 {
 	struct exprNode* facto;
@@ -1007,13 +1035,110 @@ struct assign_stmtNode* assign_stmt()
 	}
 }
 
+struct primaryNode* primary()
+{
+    cout<<"\n Inside Primary node\n";
+
+    struct primaryNode* primNode;
+
+    ttype = getToken();
+    cout<<"\n Got TOken " << ttype <<"\n";
+    if (ttype == ID)
+    {
+        primNode = make_primaryNode();
+        primNode->tag = ID;
+        primNode->id = (char *) malloc((tokenLength+1)*sizeof(char));
+        strcpy(primNode->id, token);
+        return primNode;
+    }
+
+    else if (ttype == NUM)
+    {
+        primNode = make_primaryNode();
+        primNode->tag = NUM;
+        primNode->ival = atoi(token);
+        return primNode; 
+    }
+    else if (ttype == REALNUM)
+    {
+        primNode = make_primaryNode();
+        primNode->tag = REALNUM;
+        primNode->fval = atof(token);
+        return primNode;
+    }
+    else
+    {
+        syntax_error("NUM, REALNUM or ID expected", line_no);
+        exit(0);
+    }
+}
+
+
+struct conditionNode* condition()
+{
+    struct conditionNode* condNode;
+
+    cout << "\n Inside condition node\n";
+
+    condNode = make_conditionNode();
+    ttype = getToken();
+
+    if(ttype == ID || ttype == NUM || ttype == REALNUM)
+    {
+        ungetToken();
+        cout << "\ncalling primary for left op\n";
+        condNode -> left_operand = primary();
+        
+        ttype = getToken();
+        if(ttype == GREATER || ttype == GTEQ || ttype ==LESS || ttype == NOTEQUAL || ttype == LTEQ)
+        {
+
+            cout<<"\nGot relop as" << ttype<<"\n";
+            condNode->relop = ttype;
+        }
+        else
+        {
+            syntax_error("while stat operators expected", line_no);
+            exit(0);
+        }    
+
+        cout << "\ncalling primary for right op\n";
+            
+        condNode -> right_operand = primary();
+        
+        cout<< "\nreturning cond node\n"; 
+        return condNode;
+    }
+    else
+    {
+        syntax_error("Bug in conidtion node parsing", line_no);
+    }
+}
+
 struct while_stmtNode* while_stmt()
 {
-//***********************************************
-// ADD LOGIC OF PARSING WHILE STMT HERE
-//*********************************************
+     struct while_stmtNode* whileStmt;
+    
+     whileStmt = make_while_stmtNode();     
+  
+     cout << "\nInside while stmt\n";
+ 
+     ttype = getToken();
+     if (ttype == WHILE)
+     { 
+        cout << "\nCalling condition\n";
+        whileStmt->condition = condition();
 
-	return NULL;
+
+        cout<< "\ncalling body\n";
+        whileStmt->body = body();
+        return whileStmt; 
+     }
+     else
+     {
+        syntax_error("while_stmt. WHILE expected", line_no);
+        exit(0);
+     }
 }
 
 struct stmtNode* stmt()
@@ -1039,7 +1164,8 @@ struct stmtNode* stmt()
 	if (ttype == WHILE) // while_stmt
 	{	ungetToken();
 		stm->while_stmt = while_stmt();
-		stm->stmtType = WHILE;	
+		stm->stmtType = WHILE;
+        return stm;	
 	} else // syntax error
 	{
 		syntax_error("stmt. ID or WHILE expected", line_no);
