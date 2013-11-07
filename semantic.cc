@@ -623,11 +623,11 @@ void print_condition(struct conditionNode* condition)
         {
             new_val = start_val + 1;
             start_val = new_val;
-            typevalue_to_typeid_map[condition->left_operand->id] = new_val;
             temp_typename = condition->left_operand->id;
+            typevalue_to_typeid_map[temp_typename] = new_val;
             leftop_type = new_val;
 
-            // Order maintainance addition
+            // Order mainteinance addition
             var_decl_map[temp_typename] = 0;
             var_implicit_list.push_back(temp_typename);
 
@@ -663,6 +663,39 @@ void print_condition(struct conditionNode* condition)
         rightop_type = print_operand(condition->right_operand);
         cout<< "\nRightop type  "<<rightop_type<<"\n";
 
+        if (rightop_type == ID)
+        {
+            new_val = start_val + 1;
+            start_val = new_val;
+            temp_typename = condition->right_operand->id;
+            typevalue_to_typeid_map[temp_typename] = new_val;            rightop_type = new_val; 
+
+            //Order maintenance addition
+            var_decl_map[temp_typename] = 0;
+            var_implicit_list.push_back(temp_typename);
+
+            //Content addition
+            
+            //Need to add in three places
+
+            //First place
+
+            temp_id_set.clear();
+            temp_id_set.insert(temp_typename);
+            typeid_to_ids_set_map[rightop_type] = temp_id_set;
+
+            //Second place
+            temp_id_list.clear();
+            temp_id_list.push_back(temp_typename);
+            if(varsec_typeid_to_ids_list_map.count(rightop_type)>0)
+            {
+                temp_id_list = varsec_typeid_to_ids_list_map[rightop_type];
+                temp_id_list.push_back(temp_typename);
+            } 
+            varsec_typeid_to_ids_list_map[leftop_type] = temp_id_list;
+            varsec_typename_order_list.push_back(temp_typename);
+
+        }
     }
     cout<<"\n";
 
