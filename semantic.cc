@@ -454,9 +454,9 @@ void print_decl(struct declNode* dec)
 void print_body(struct bodyNode* body)
 {
     //cout<<"Inside print body";
-	printf("{\n");
+	//printf("{\n");
 	print_stmt_list(body->stmt_list); 
-    printf("}\n");
+    //printf("}\n");
 	
 }
 
@@ -535,8 +535,8 @@ void print_stmt_list(struct stmt_listNode* stmt_list)
 void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 {
 
-	printf("%s ", assign_stmt->id);
-	printf("= ");
+	//printf("%s ", assign_stmt->id);
+	//printf("= ");
 
     //cout << "\nprint assign stmt\n";
 
@@ -584,8 +584,8 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 	
 	rightop_type = print_expression_prefix(assign_stmt->expr);
     
-    cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
-    cout<<"\n Right info "<<rightop_type<<"\n\n";
+    //cout<< "Leftop info  "<<assign_stmt->id<<" is "<< leftop_type<<"\n";
+    //cout<<"\n Right info "<<rightop_type<<"\n\n";
     
 	if (((leftop_type > UD) && (rightop_type > UD)) && (leftop_type != rightop_type))
 	{
@@ -593,20 +593,20 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
             {
                 if(var_implicit_pos_map[selected_id] > var_implicit_pos_map[assign_stmt->id])
                 {
-                    cout << "\nINSIDEEEE IF-- ----- IF --- FLOWWWW\n";
+                    //cout << "\nINSIDEEEE IF-- ----- IF --- FLOWWWW\n";
 		            update_builtin_id_type(rightop_type, leftop_type);	
                     
                 }
                 else 
                 {
-                    cout << "\nINSIDEEEE IF ---------- ELSE ----- FLOWWWW\n";
+                    //cout << "\nINSIDEEEE IF ---------- ELSE ----- FLOWWWW\n";
 		            update_builtin_id_type(leftop_type, rightop_type);	
                 
                 }
             }
             else
             {
-                cout<< "\nINSIDEEEE ELSE FLOOWWWW\n";
+                //cout<< "\nINSIDEEEE ELSE FLOOWWWW\n";
 		        update_builtin_id_type(rightop_type, leftop_type);	
             }
 	}		
@@ -631,7 +631,7 @@ void print_assign_stmt(struct assign_stmtNode* assign_stmt)
 		exit(0);
 	}
 
-	printf("; \n");
+	//printf("; \n");
 }
 
 void print_condition(struct conditionNode* condition)
@@ -639,11 +639,11 @@ void print_condition(struct conditionNode* condition)
     leftop_type = 0;
     rightop_type = 0;
 
-    cout<<"WHILE ";
+    //cout<<"WHILE ";
     if (condition->left_operand != NULL)
     {
         leftop_type = print_operand(condition->left_operand);
-        cout<< "\nLeftop type  "<<leftop_type<<"\n";
+       // cout<< "\nLeftop type  "<<leftop_type<<"\n";
 
         if (leftop_type == ID)
         {
@@ -680,14 +680,14 @@ void print_condition(struct conditionNode* condition)
             varsec_typename_order_list.push_back(temp_typename);
             
         
-            cout<<"\nAdded "<<temp_typename<<" from leftop type and the value is "<<new_val<<"\n";
+            //cout<<"\nAdded "<<temp_typename<<" from leftop type and the value is "<<new_val<<"\n";
         }
     }
      if (condition -> right_operand != NULL)
     {
-        printf("%d", condition->relop);
+        //printf("%d", condition->relop);
         rightop_type = print_operand(condition->right_operand);
-        cout<< "\nRightop type  "<<rightop_type<<"\n";
+        //cout<< "\nRightop type  "<<rightop_type<<"\n";
 
         if (rightop_type == ID)
         {
@@ -724,14 +724,14 @@ void print_condition(struct conditionNode* condition)
 
         }
     }
-    cout<<"\n";
+    //cout<<"\n";
 
     if(leftop_type != 0 && rightop_type !=0)
     {
         //both the operands present
         if (leftop_type > UD && rightop_type > UD)
             {
-                cout<<"\nENTERING IN TO FIRST FLOWWWW\n";
+                //cout<<"\nENTERING IN TO FIRST FLOWWWW\n";
                 update_builtin_id_type(rightop_type, leftop_type);  
                 update_builtin_id_type(leftop_type, BOOLEAN);      
             }
@@ -764,7 +764,7 @@ int print_operand(struct primaryNode* primary)
    
     if (primary->tag == ID)
     {
-        printf(" %s ", primary->id);
+        //printf(" %s ", primary->id);
         if(typevalue_to_typeid_map.count(primary->id)>0)
         {
             return typevalue_to_typeid_map[primary->id];
@@ -777,12 +777,12 @@ int print_operand(struct primaryNode* primary)
     }   
     else if(primary->tag == NUM)
     {
-        printf(" %d ", primary->ival);
+        //printf(" %d ", primary->ival);
         return primary->tag;
     }
     else if(primary->tag == REALNUM)
     {
-        printf(" %.4f ", primary->fval);
+        //printf(" %.4f ", primary->fval);
         return primary->tag;
     }
 }
@@ -816,7 +816,7 @@ int print_expression_prefix(struct exprNode* expr)
 		leftop_type = print_expression_prefix(expr->leftOperand);
         //cout << "\nLeftop type is "<<leftop_type<<"\n";
 
-		printf("%s ", reserved[expr->oper]);
+		//printf("%s ", reserved[expr->oper]);
 
 		rightop_type = print_expression_prefix(expr->rightOperand);
 		//cout << "\nRightop type is "<<rightop_type<<"\n";
@@ -853,7 +853,7 @@ int print_expression_prefix(struct exprNode* expr)
 	{
 		if (expr->primary->tag == ID)
 		{
-			printf("%s ", expr->primary->id);
+			//printf("%s ", expr->primary->id);
 			selected_id = expr->primary->id;
 			if(typevalue_to_typeid_map.count(selected_id) == 0)
             {
@@ -885,13 +885,13 @@ int print_expression_prefix(struct exprNode* expr)
 		}
 		else if (expr->primary->tag == NUM)
 		{
-			printf("%d ", expr->primary->ival);
+			//printf("%d ", expr->primary->ival);
 			selected_id = expr->primary->ival;
 			return INT;
 		}
 		else if (expr->primary->tag == REALNUM)
 		{
-			printf("%.4f ", expr->primary->fval);
+			//printf("%.4f ", expr->primary->fval);
 			selected_id = expr->primary->fval;
 			return REAL;
 		}
@@ -909,9 +909,9 @@ void update_builtin_id_type(int old_id, int new_id)
     temp_id_set_1.clear();
 
     
-    cout <<"\n old id is "<<old_id<<"\n";
+    //cout <<"\n old id is "<<old_id<<"\n";
 
-    cout<< "\n New id is"<<new_id<<"\n";
+    //cout<< "\n New id is"<<new_id<<"\n";
 
 
     //TYPESEC TYPID TO IDS LIST
@@ -926,8 +926,8 @@ void update_builtin_id_type(int old_id, int new_id)
     
     
     //VAR SEC TYPE ID TO IDS LIST
-    cout<<"\nExisting old one - type sec id set \n"<<old_id;
-    print_set(temp_id_set);
+    //cout<<"\nExisting old one - type sec id set \n"<<old_id;
+    //print_set(temp_id_set);
 	temp_id_list = varsec_typeid_to_ids_list_map[old_id];
     //print_list(temp_id_list);
 	for(sl_it_2 = temp_id_list.begin(); sl_it_2 != temp_id_list.end(); sl_it_2++)
@@ -938,8 +938,8 @@ void update_builtin_id_type(int old_id, int new_id)
         temp_id_set_1.insert(*sl_it_2);
 	}
 	
-    cout<<"\nExisting old one - var sec id set\n"<<old_id;
-    print_set(temp_id_set_1);
+    //cout<<"\nExisting old one - var sec id set\n"<<old_id;
+    //print_set(temp_id_set_1);
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
 
     temp_id_set_1.clear();    
@@ -957,14 +957,14 @@ void update_builtin_id_type(int old_id, int new_id)
     // DEALING WITH VALUES OF  NEW ID
     temp_id_set_1 = typeid_to_ids_set_map[new_id];
 
-    cout<<"\nExisting new one -  \n";
-    print_set(temp_id_set_1);
+    //cout<<"\nExisting new one -  \n";
+    //print_set(temp_id_set_1);
 
     temp_id_set.insert(temp_id_set_1.begin(), temp_id_set_1.end());
     typeid_to_ids_set_map[new_id] = temp_id_set;
  
-    cout<<"\nFinal combined new one \n"; 
-    print_set(temp_id_set);
+    //cout<<"\nFinal combined new one \n"; 
+    //print_set(temp_id_set);
  
     //print_set(temp_id_set);
 
@@ -974,7 +974,7 @@ void update_builtin_id_type(int old_id, int new_id)
 
     temp_id_set_1.clear();
 
-    cout<<"\n------------------------------\n";
+    //cout<<"\n------------------------------\n";
     //cout<< "\nEnd of update built in method\n";
 } 
 
@@ -2490,7 +2490,7 @@ void generate_output_content()
     }
 
    
-    print_output_map();
+    //print_output_map();
  
     //FOR TYPE IMPLICIT
 
@@ -2511,7 +2511,7 @@ void generate_output_content()
             
     }
 
-    print_output_map();
+    //print_output_map();
 
     //FOR VAR IMPLICIT
     for(sl_it = var_implicit_list.begin(); sl_it != var_implicit_list.end(); sl_it++)
@@ -2531,7 +2531,7 @@ void generate_output_content()
 
     }
     
-    print_output_map();
+    //print_output_map();
 
 }
 
